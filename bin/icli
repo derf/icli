@@ -114,19 +114,43 @@ __END__
 
 =head1 NAME
 
+B<icli> - Icinga Command Line Interface
+
 =head1 SYNOPSIS
+
+B<icli> [B<-h> I<host>]
 
 =head1 DESCRIPTION
 
+B<icli> is a command line interface to Icinga. By default it lists all
+services and their states.
+
 =head1 OPTIONS
+
+=over
+
+=item B<-h> I<host>
+
+Only show I<host>'s services
+
+=back
 
 =head1 EXIT STATUS
 
+Zero, unless errors occured.
+
 =head1 CONFIGURATION
+
+None.
 
 =head1 DEPENDENCIES
 
+None, so far.
+
 =head1 BUGS AND LIMITATIONS
+
+This software is in early development stages. So there will probably be quite
+a lot.
 
 =head1 AUTHOR
 
