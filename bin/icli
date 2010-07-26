@@ -2,6 +2,74 @@
 use strict;
 use warnings;
 use 5.010;
+use autodie;
+
+my ($data, $cache);
+my $status_file = '/var/lib/icinga/status.dat';
+my $context;
+
+sub read_status_line {
+	my ($line) = @_;
+
+	if ($line =~ / ^ (?<context> \w+) \s+ { /x) {
+		$context = $+{context};
+	}
+	elsif ($line =~ / ^ \t* (?<key> [^=]+ ) = (?<value> .*) $ /x) {
+		$cache->{$+{key}} = $+{value};
+	}
+	elsif ($line =~ / ^ \t* } \s* $ /x) {
+		given($context) {
+			when(['info', 'programstatus']) {
+				$data->{$context} = $cache;
+			}
+			when('hoststatus') {
+				push(@{$data->{hosts}}, $cache);
+			}
+			when('servicestatus') {
+				push(@{$data->{services}}, $cache);
+			}
+			when('contactstatus') {
+				push(@{$data->{contacts}}, $cache);
+			}
+			default {
+				warn("Unknown field in $status_file: $context\n");
+			}
+		}
+		$cache = undef;
+	}
+}
+
+sub read_status {
+	open(my $fh, '<', $status_file);
+	while (my $line = <$fh>) {
+		chomp($line);
+		read_status_line($line);
+	}
+	close($fh);
+}
+
+sub state_to_string {
+	my ($digit) = @_;
+	given ($digit) {
+		when(0) { return 'OK'       }
+		when(1) { return 'WARNING'  }
+		when(2) { return 'CRITICAL' }
+		when(3) { return 'UNKNOWN'  }
+		default { return '???'      }
+	}
+}
+
+read_status();
+
+foreach my $s (@{$data->{services}}) {
+	printf(
+		"%24s/%-20s %s: %s\n",
+		$s->{host_name},
+		$s->{service_description},
+		state_to_string($s->{current_state}),
+		$s->{plugin_output},
+	);
+}
 
 __END__
 
