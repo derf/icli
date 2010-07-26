@@ -7,10 +7,11 @@ use 5.010;
 use Getopt::Long;
 use Term::ANSIColor;
 
-my ($data, $cache);
+my ($data, $cache, $extra);
 my $status_file = '/var/lib/icinga/status.dat';
 my $context;
 my $colours = 1;
+my $short = 0;
 my ($for_host);
 
 
@@ -43,6 +44,9 @@ sub read_status_line {
 			}
 			when('servicestatus') {
 				push(@{$data->{services}->{$cache->{host_name}}}, $cache);
+				if ($cache->{current_state} != 0) {
+					$extra->{$cache->{host_name}}->{service_problem} = 1;
+				}
 			}
 			when('contactstatus') {
 				push(@{$data->{contacts}}, $cache);
@@ -88,11 +92,15 @@ sub display_service {
 sub display_host {
 	my ($host, $all) = @_;
 
-	if ($all) {
+	if ($all and (not $short or $extra->{$host}->{service_problem})) {
 		say "\n$host";
 	}
 
 	foreach my $service (@{$data->{services}->{$host}}) {
+
+		if ($short and not $service->{current_state}) {
+			next;
+		}
 
 		if ($all) {
 			print "\t";
@@ -106,6 +114,7 @@ GetOptions(
 	'C|no-colours'    => sub { $colours = 0 },
 	'f|status-file=s' => \$status_file,
 	'h|host=s'        => \$for_host,
+	's|short'         => \$short,
 );
 
 read_status();
@@ -155,6 +164,10 @@ F</var/lib/icinga/status.dat>
 =item B<-h>/B<--host> I<host>
 
 Only show I<host>'s services
+
+=item B<-s>/B<--short>
+
+Only show services which are not OK
 
 =back
 
