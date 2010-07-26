@@ -10,7 +10,19 @@ use Term::ANSIColor;
 my ($data, $cache);
 my $status_file = '/var/lib/icinga/status.dat';
 my $context;
+my $colours = 1;
 my ($for_host);
+
+
+sub with_colour {
+	my ($text, $colour) = @_;
+	if ($colours) {
+		return colored($text, $colour);
+	}
+	else {
+		return $text;
+	}
+}
 
 sub read_status_line {
 	my ($line) = @_;
@@ -55,11 +67,11 @@ sub read_status {
 sub state_to_string {
 	my ($digit) = @_;
 	given ($digit) {
-		when(0) { return colored('   OK   ', 'black on_green' ) }
-		when(1) { return colored(' WARNING', 'black on_yellow') }
-		when(2) { return colored('CRITICAL', 'white on_red'   ) }
-		when(3) { return colored(' UNKNOWN', 'white on_blue'  ) }
-		default { return colored('  ???   ', 'white'          ) }
+		when(0) { return with_colour('   OK   ', 'black on_green' ) }
+		when(1) { return with_colour(' WARNING', 'black on_yellow') }
+		when(2) { return with_colour('CRITICAL', 'white on_red'   ) }
+		when(3) { return with_colour(' UNKNOWN', 'white on_blue'  ) }
+		default { return with_colour('  ???   ', 'white'          ) }
 	}
 }
 
@@ -91,7 +103,8 @@ sub display_host {
 }
 
 GetOptions(
-	'h|host=s'  => \$for_host,
+	'C|no-colours' => sub { $colours = 0 },
+	'h|host=s'    => \$for_host,
 );
 
 read_status();
@@ -129,7 +142,11 @@ services and their states.
 
 =over
 
-=item B<-h> I<host>
+=item B<-C>/B<--no-colours>
+
+Disable colours in output
+
+=item B<-h>/B<--host> I<host>
 
 Only show I<host>'s services
 
