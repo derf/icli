@@ -103,8 +103,9 @@ sub display_host {
 }
 
 GetOptions(
-	'C|no-colours' => sub { $colours = 0 },
-	'h|host=s'    => \$for_host,
+	'C|no-colours'    => sub { $colours = 0 },
+	'f|status-file=s' => \$status_file,
+	'h|host=s'        => \$for_host,
 );
 
 read_status();
@@ -145,6 +146,11 @@ services and their states.
 =item B<-C>/B<--no-colours>
 
 Disable colours in output
+
+=item B<-f>/B<--status-file> I<file>
+
+Read the status from I<file> instead of the default
+F</var/lib/icinga/status.dat>
 
 =item B<-h>/B<--host> I<host>
 
