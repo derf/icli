@@ -4,11 +4,13 @@ use strict;
 use warnings;
 use 5.010;
 
+use Getopt::Long;
 use Term::ANSIColor;
 
 my ($data, $cache);
 my $status_file = '/var/lib/icinga/status.dat';
 my $context;
+my ($for_host);
 
 sub read_status_line {
 	my ($line) = @_;
@@ -61,17 +63,50 @@ sub state_to_string {
 	}
 }
 
+sub display_service {
+	my ($s) = @_;
+	printf(
+		"%-20.20s %s %s\n",
+		$s->{service_description},
+		state_to_string($s->{current_state}),
+		$s->{plugin_output},
+	);
+}
+
+sub display_host {
+	my ($host, $all) = @_;
+
+	if ($all) {
+		say "\n$host";
+	}
+
+	foreach my $service (@{$data->{services}->{$host}}) {
+
+		if ($all) {
+			print "\t";
+		}
+
+		display_service($service);
+	}
+}
+
+GetOptions(
+	'h|host=s'  => \$for_host,
+);
+
 read_status();
 
-foreach my $host (sort keys %{$data->{services}}) {
-	say "\n$host";
-	foreach my $s (@{$data->{services}->{$host}}) {
-		printf(
-			"\t%-20.20s %s  %s\n",
-			$s->{service_description},
-			state_to_string($s->{current_state}),
-			$s->{plugin_output},
-		);
+if ($for_host) {
+	if (exists $data->{services}->{$for_host}) {
+		display_host($for_host, 0);
+	}
+	else {
+		die("Unknown host: $for_host (You need to use the Alias name)\n");
+	}
+}
+else {
+	foreach my $host (sort keys %{$data->{services}}) {
+		display_host($host, 1);
 	}
 }
 
