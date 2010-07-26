@@ -1,8 +1,10 @@
 #!/usr/bin/env perl
+use autodie;
 use strict;
 use warnings;
 use 5.010;
-use autodie;
+
+use Term::ANSIColor;
 
 my ($data, $cache);
 my $status_file = '/var/lib/icinga/status.dat';
@@ -26,7 +28,7 @@ sub read_status_line {
 				push(@{$data->{hosts}}, $cache);
 			}
 			when('servicestatus') {
-				push(@{$data->{services}}, $cache);
+				push(@{$data->{services}->{$cache->{host_name}}}, $cache);
 			}
 			when('contactstatus') {
 				push(@{$data->{contacts}}, $cache);
@@ -51,24 +53,26 @@ sub read_status {
 sub state_to_string {
 	my ($digit) = @_;
 	given ($digit) {
-		when(0) { return 'OK'       }
-		when(1) { return 'WARNING'  }
-		when(2) { return 'CRITICAL' }
-		when(3) { return 'UNKNOWN'  }
-		default { return '???'      }
+		when(0) { return colored('   OK   ', 'black on_green' ) }
+		when(1) { return colored(' WARNING', 'black on_yellow') }
+		when(2) { return colored('CRITICAL', 'white on_red'   ) }
+		when(3) { return colored(' UNKNOWN', 'white on_blue'  ) }
+		default { return colored('  ???   ', 'white'          ) }
 	}
 }
 
 read_status();
 
-foreach my $s (@{$data->{services}}) {
-	printf(
-		"%24s/%-20s %s: %s\n",
-		$s->{host_name},
-		$s->{service_description},
-		state_to_string($s->{current_state}),
-		$s->{plugin_output},
-	);
+foreach my $host (sort keys %{$data->{services}}) {
+	say "\n$host";
+	foreach my $s (@{$data->{services}->{$host}}) {
+		printf(
+			"\t%-20.20s %s  %s\n",
+			$s->{service_description},
+			state_to_string($s->{current_state}),
+			$s->{plugin_output},
+		);
+	}
 }
 
 __END__
