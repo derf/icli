@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use 5.010;
 
-use Getopt::Long;
+use Getopt::Long qw/:config bundling/;
 use Term::ANSIColor;
 
 my ($data, $cache, $extra);
