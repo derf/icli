@@ -12,8 +12,18 @@ my $status_file = '/var/lib/icinga/status.dat';
 my $context;
 my $colours = 1;
 my $short = 0;
+my $list_type = 's';
 my ($for_host);
 
+sub have_host {
+	my ($host) = @_;
+	if ($list_type eq 's') {
+		return exists $data->{services}->{$host};
+	}
+	elsif ($list_type eq 'h') {
+		return exists $data->{hosts}->{$host};
+	}
+}
 
 sub with_colour {
 	my ($text, $colour) = @_;
@@ -40,7 +50,7 @@ sub read_status_line {
 				$data->{$context} = $cache;
 			}
 			when('hoststatus') {
-				push(@{$data->{hosts}}, $cache);
+				$data->{hosts}->{$cache->{host_name}} = $cache;
 			}
 			when('servicestatus') {
 				push(@{$data->{services}->{$cache->{host_name}}}, $cache);
@@ -68,14 +78,24 @@ sub read_status {
 	close($fh);
 }
 
-sub state_to_string {
+sub service_state {
 	my ($digit) = @_;
 	given ($digit) {
 		when(0) { return with_colour('   OK   ', 'black on_green' ) }
 		when(1) { return with_colour(' WARNING', 'black on_yellow') }
 		when(2) { return with_colour('CRITICAL', 'white on_red'   ) }
 		when(3) { return with_colour(' UNKNOWN', 'white on_blue'  ) }
-		default { return with_colour('  ???   ', 'white'          ) }
+		default { return $digit }
+	}
+}
+
+sub host_state {
+	my ($digit) = @_;
+	given($digit) {
+		when(0) { return with_colour('    OK     ', 'black on_green') }
+		when(1) { return with_colour('   DOWN    ', 'white on_red'  ) }
+		when(2) { return with_colour('UNREACHABLE', 'white on_blue' ) }
+		default { return $digit }
 	}
 }
 
@@ -84,12 +104,12 @@ sub display_service {
 	printf(
 		"%-20.20s %s %s\n",
 		$s->{service_description},
-		state_to_string($s->{current_state}),
+		service_state($s->{current_state}),
 		$s->{plugin_output},
 	);
 }
 
-sub display_host {
+sub display_host_services {
 	my ($host, $all) = @_;
 
 	if ($all and (not $short or $extra->{$host}->{service_problem})) {
@@ -110,25 +130,58 @@ sub display_host {
 	}
 }
 
+sub display_host_single {
+	my ($host) = @_;
+	my $h = $data->{hosts}->{$host};
+
+	if ($short and not $h->{current_state}) {
+		return;
+	}
+
+	printf(
+		"%-32.32s %s %s\n",
+		$h->{host_name},
+		host_state($h->{current_state}),
+		$h->{plugin_output},
+	);
+}
+
+sub display_host {
+	my ($host, $all) = @_;
+
+	if ($list_type eq 'h') {
+		display_host_single($host);
+	}
+	elsif ($list_type eq 's') {
+		display_host_services($host, $all);
+	}
+}
+
 GetOptions(
 	'C|no-colours'    => sub { $colours = 0 },
 	'f|status-file=s' => \$status_file,
 	'h|host=s'        => \$for_host,
+	'l|list=s'        => sub { $list_type = substr($_[1], 0, 1) },
 	's|short'         => \$short,
 );
 
 read_status();
 
 if ($for_host) {
-	if (exists $data->{services}->{$for_host}) {
+	if (have_host($for_host)) {
 		display_host($for_host, 0);
 	}
 	else {
 		die("Unknown host: $for_host (You need to use the Alias name)\n");
 	}
 }
-else {
+elsif ($list_type eq 's') {
 	foreach my $host (sort keys %{$data->{services}}) {
+		display_host($host, 1);
+	}
+}
+elsif ($list_type eq 'h') {
+	foreach my $host (sort keys %{$data->{hosts}}) {
 		display_host($host, 1);
 	}
 }
@@ -164,6 +217,12 @@ F</var/lib/icinga/status.dat>
 =item B<-h>/B<--host> I<host>
 
 Only show I<host>'s services
+
+=item B<-l>/B<--list> B<hosts>|B<services>
+
+List either services (the default) or hosts.
+Note that only the first character of the argument is checked, so C<< icinga
+-lh >> and C<< icinga -ls >> are also fine.
 
 =item B<-s>/B<--short>
 
