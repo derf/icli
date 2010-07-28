@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use 5.010;
 
-use Test::Command tests => (19*3);
+use Test::Command tests => (20*3);
 
 my $icli = 'bin/icli -f t/in/status.dat -c t/in/objects.cache';
 
@@ -13,6 +13,11 @@ my $cmd = Test::Command->new(cmd => $icli);
 
 $cmd->exit_is_num(0);
 $cmd->stdout_is_file('t/out/standard');
+$cmd->stderr_is_eq($EMPTY);
+
+$cmd = Test::Command->new(cmd => "$icli -V");
+$cmd->exit_is_num(0);
+$cmd->stdout_like(qr{ ^ icli \s version \s \S+ $ }x);
 $cmd->stderr_is_eq($EMPTY);
 
 $cmd = Test::Command->new(cmd => "$icli -lh -g local");

@@ -7,6 +7,8 @@ use 5.010;
 use Getopt::Long qw/:config bundling/;
 use Term::ANSIColor;
 
+my $version = '0.0+git';
+
 my ($cache, $config, $data, $extra);
 my $config_file = '/var/cache/icinga/objects.cache';
 my $status_file = '/var/lib/icinga/status.dat';
@@ -182,6 +184,7 @@ GetOptions(
 	'h|host=s'        => sub { push(@for_hosts, split(/,/, $_[1])) },
 	'l|list=s'        => sub { $list_type = substr($_[1], 0, 1) },
 	's|short'         => \$short,
+	'V|version'       => sub { say "icli version $version"; exit 0 },
 );
 
 read_objects($status_file, \$data);
