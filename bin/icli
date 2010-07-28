@@ -14,7 +14,7 @@ my $context;
 my $colours = 1;
 my $short = 0;
 my $list_type = 's';
-my (@for_hosts);
+my (@for_hosts, @for_groups);
 
 sub have_host {
 	my ($host) = @_;
@@ -39,13 +39,13 @@ sub with_colour {
 sub read_objects_line {
 	my ($line, $ref) = @_;
 
-	if ($line =~ / ^ (?<context> \w+) \s+ { /x) {
+	if ($line =~ / ^ (?:define \s )? (?<context> \w+) \s+ { /x) {
 		$context = $+{context};
 	}
-	elsif ($line =~ / ^ \t* (?<key> [^=]+ ) = (?<value> .*) $ /x) {
+	elsif ($line =~ / ^ \t (?<key> [^=\t]+ ) [=\t] (?<value> .*) $ /x) {
 		$cache->{$+{key}} = $+{value};
 	}
-	elsif ($line =~ / ^ \t* } \s* $ /x) {
+	elsif ($line =~ / ^ \t } $ /x) {
 		given($context) {
 			when(['info', 'programstatus']) {
 				${$ref}->{$context} = $cache;
@@ -177,13 +177,26 @@ sub display_host {
 GetOptions(
 	'C|no-colours'    => sub { $colours = 0 },
 	'f|status-file=s' => \$status_file,
+	'g|hostgroup=s'   => sub { push(@for_groups, split(/,/, $_[1])) },
 	'h|host=s'        => sub { push(@for_hosts, split(/,/, $_[1])) },
 	'l|list=s'        => sub { $list_type = substr($_[1], 0, 1) },
 	's|short'         => \$short,
 );
 
 read_objects($status_file, \$data);
+read_objects($config_file, \$config);
 enhance_status();
+
+foreach my $group (@for_groups) {
+	if (not exists $config->{hostgroups}->{$group}) {
+		die("Unknown hostgroup: $group\n");
+	}
+	foreach my $host (split(/,/, $config->{hostgroups}->{$group}->{members})) {
+		if (not grep { $_ eq $host } @for_hosts) {
+			push(@for_hosts, $host);
+		}
+	}
+}
 
 if (@for_hosts) {
 	foreach my $host (@for_hosts) {
@@ -236,6 +249,10 @@ Disable colours in output
 
 Read the status from I<file> instead of the default
 F</var/lib/icinga/status.dat>
+
+=item B<-g>/B<--hostgroup> I<hostgroup>
+
+Show details for all hosts in I<hostgroup>
 
 =item B<-h>/B<--host> I<host>
 
