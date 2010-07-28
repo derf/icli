@@ -175,6 +175,7 @@ sub display_host {
 }
 
 GetOptions(
+	'c|config=s'      => \$config_file,
 	'C|no-colours'    => sub { $colours = 0 },
 	'f|status-file=s' => \$status_file,
 	'g|hostgroup=s'   => sub { push(@for_groups, split(/,/, $_[1])) },
@@ -240,6 +241,11 @@ services and their states.
 =head1 OPTIONS
 
 =over
+
+=item B<-c>/B<--config> I<config>
+
+Read config from I<file> instead of the default
+F</var/cache/icinga/objects.cache>
 
 =item B<-C>/B<--no-colours>
 
