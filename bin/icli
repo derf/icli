@@ -21,7 +21,7 @@ sub have_host {
 	if ($list_type eq 's') {
 		return exists $data->{services}->{$host};
 	}
-	elsif ($list_type eq 'h') {
+	else {
 		return exists $data->{hosts}->{$host};
 	}
 }
@@ -66,7 +66,7 @@ sub read_objects_line {
 				# skipped for now
 			}
 			default {
-				warn("Unknown field in $status_file: $context\n");
+				die("Unknown field in $status_file: $context\n");
 			}
 		}
 		$cache = undef;
@@ -102,7 +102,7 @@ sub service_state {
 		when(1) { return with_colour(' WARNING', 'black on_yellow') }
 		when(2) { return with_colour('CRITICAL', 'white on_red'   ) }
 		when(3) { return with_colour(' UNKNOWN', 'white on_blue'  ) }
-		default { return $digit }
+		default { die("Unknown service state: $digit\n") }
 	}
 }
 
@@ -112,7 +112,7 @@ sub host_state {
 		when(0) { return with_colour('    OK     ', 'black on_green') }
 		when(1) { return with_colour('   DOWN    ', 'white on_red'  ) }
 		when(2) { return with_colour('UNREACHABLE', 'white on_blue' ) }
-		default { return $digit }
+		default { die("Unknown host state: $digit\n") }
 	}
 }
 
@@ -169,7 +169,7 @@ sub display_host {
 	if ($list_type eq 'h') {
 		display_host_single($host);
 	}
-	elsif ($list_type eq 's') {
+	else {
 		display_host_services($host, $all);
 	}
 }
@@ -221,6 +221,9 @@ elsif ($list_type eq 'h') {
 	foreach my $host (sort keys %{$data->{hosts}}) {
 		display_host($host, 1);
 	}
+}
+else {
+	die("See perldoc -F $0\n");
 }
 
 __END__
