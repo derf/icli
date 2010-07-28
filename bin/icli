@@ -7,13 +7,14 @@ use 5.010;
 use Getopt::Long qw/:config bundling/;
 use Term::ANSIColor;
 
-my ($data, $cache, $extra);
+my ($cache, $config, $data, $extra);
+my $config_file = '/var/cache/icinga/objects.cache';
 my $status_file = '/var/lib/icinga/status.dat';
 my $context;
 my $colours = 1;
 my $short = 0;
 my $list_type = 's';
-my ($for_host);
+my (@for_hosts);
 
 sub have_host {
 	my ($host) = @_;
@@ -35,8 +36,8 @@ sub with_colour {
 	}
 }
 
-sub read_status_line {
-	my ($line) = @_;
+sub read_objects_line {
+	my ($line, $ref) = @_;
 
 	if ($line =~ / ^ (?<context> \w+) \s+ { /x) {
 		$context = $+{context};
@@ -47,16 +48,22 @@ sub read_status_line {
 	elsif ($line =~ / ^ \t* } \s* $ /x) {
 		given($context) {
 			when(['info', 'programstatus']) {
-				$data->{$context} = $cache;
+				${$ref}->{$context} = $cache;
 			}
 			when('hoststatus') {
-				$data->{hosts}->{$cache->{host_name}} = $cache;
+				${$ref}->{hosts}->{$cache->{host_name}} = $cache;
 			}
 			when('servicestatus') {
-				push(@{$data->{services}->{$cache->{host_name}}}, $cache);
+				push(@{${$ref}->{services}->{$cache->{host_name}}}, $cache);
 			}
 			when('contactstatus') {
-				push(@{$data->{contacts}}, $cache);
+				push(@{${$ref}->{contacts}}, $cache);
+			}
+			when('hostgroup') {
+				${$ref}->{hostgroups}->{$cache->{hostgroup_name}} = $cache;
+			}
+			when([qw[timeperiod command contactgroup contact host service]]) {
+				# skipped for now
 			}
 			default {
 				warn("Unknown field in $status_file: $context\n");
@@ -66,11 +73,13 @@ sub read_status_line {
 	}
 }
 
-sub read_status {
-	open(my $fh, '<', $status_file);
+sub read_objects {
+	my ($file, $ref) = @_;
+
+	open(my $fh, '<', $file);
 	while (my $line = <$fh>) {
 		chomp($line);
-		read_status_line($line);
+		read_objects_line($line, $ref);
 	}
 	close($fh);
 }
@@ -168,20 +177,25 @@ sub display_host {
 GetOptions(
 	'C|no-colours'    => sub { $colours = 0 },
 	'f|status-file=s' => \$status_file,
-	'h|host=s'        => \$for_host,
+	'h|host=s'        => sub { push(@for_hosts, split(/,/, $_[1])) },
 	'l|list=s'        => sub { $list_type = substr($_[1], 0, 1) },
 	's|short'         => \$short,
 );
 
-read_status();
+read_objects($status_file, \$data);
 enhance_status();
 
-if ($for_host) {
-	if (have_host($for_host)) {
-		display_host($for_host, 0);
-	}
-	else {
-		die("Unknown host: $for_host (You need to use the Alias name)\n");
+if (@for_hosts) {
+	foreach my $host (@for_hosts) {
+		if (have_host($host)) {
+			display_host(
+				$host,
+				( @for_hosts > 1),
+			);
+		}
+		else {
+			die("Unknown host: $host\n");
+		}
 	}
 }
 elsif ($list_type eq 's') {
