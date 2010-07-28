@@ -1,0 +1,4 @@
+alpha                               DOWN     PING OK - Packet loss = 0%, RTA = 0.73 ms
+aneurysm                         UNREACHABLE PING OK - Packet loss = 0%, RTA = 0.10 ms
+steel-vpn                            OK      PING OK - Packet loss = 0%, RTA = 18.01 ms
+steel.derf0.net                      OK      PING OK - Packet loss = 0%, RTA = 16.75 ms

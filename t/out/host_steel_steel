@@ -1,0 +1,18 @@
+
+steel-vpn
+	SMTP                 [30;42m   OK   [0m SMTP OK - 0.080 sec. response time
+
+steel.derf0.net
+	Disk: lv-home        [30;42m   OK   [0m DISK OK - free space: /home 20207 MB (95% inode=99%):
+	Disk: lv-root        [30;42m   OK   [0m DISK OK - free space: / 5330 MB (85% inode=90%):
+	Disk: vda1           [30;42m   OK   [0m DISK OK - free space: /boot 190 MB (88% inode=99%):
+	HTTP                 [30;42m   OK   [0m HTTP OK: HTTP/1.1 200 OK - 668 bytes in 0.040 second response time
+	Load                 [30;42m   OK   [0m OK - load average: 0.00, 0.00, 0.00
+	Mail Queue           [30;42m   OK   [0m OK: mailq reports queue is empty
+	No open relay        [30;42m   OK   [0m NORELAY OK: <** 554 5.7.1 <derf@chaosdorf.de>: Relay access denied
+	Not Blacklisted      [30;42m   OK   [0m CHECK_RBL OK - steel.derf0.net BLACKLISTED on 0 servers of 43
+	Processes            [30;42m   OK   [0m PROCS OK: 82 processes
+	SMTP                 [30;42m   OK   [0m SMTP OK - 0.122 sec. response time
+	SSH                  [30;42m   OK   [0m SSH OK - OpenSSH_5.5p1 Debian-4 (protocol 2.0)
+	SSH password login d [30;42m   OK   [0m Password login disabled (server accepts publickey)
+	Users                [30;43m WARNING[0m USERS OK - 0 users currently logged in
