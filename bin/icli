@@ -54,9 +54,6 @@ sub read_status_line {
 			}
 			when('servicestatus') {
 				push(@{$data->{services}->{$cache->{host_name}}}, $cache);
-				if ($cache->{current_state} != 0) {
-					$extra->{$cache->{host_name}}->{service_problem} = 1;
-				}
 			}
 			when('contactstatus') {
 				push(@{$data->{contacts}}, $cache);
@@ -76,6 +73,17 @@ sub read_status {
 		read_status_line($line);
 	}
 	close($fh);
+}
+
+sub enhance_status {
+	HOST: for my $h (keys %{$data->{services}}) {
+		for my $s (@{$data->{services}->{$h}}) {
+			if ($s->{current_state} != 0) {
+				$extra->{$h}->{service_problem} = 1;
+				next HOST;
+			}
+		}
+	}
 }
 
 sub service_state {
@@ -166,6 +174,7 @@ GetOptions(
 );
 
 read_status();
+enhance_status();
 
 if ($for_host) {
 	if (have_host($for_host)) {
