@@ -248,39 +248,46 @@ services and their states.
 
 =over
 
-=item B<-c>/B<--config> I<config>
+=item B<-c>|B<--config> I<config>
 
 Read config from I<file> instead of the default
 F</var/cache/icinga/objects.cache>
 
-=item B<-C>/B<--no-colours>
+=item B<-C>|B<--no-colours>
 
 Disable colours in output
 
-=item B<-f>/B<--status-file> I<file>
+=item B<-f>|B<--status-file> I<file>
 
 Read the status from I<file> instead of the default
 F</var/lib/icinga/status.dat>
 
-=item B<-g>/B<--hostgroup> I<hostgroup>
+=item B<-g>|B<--hostgroup> I<hostgroup>
 
 Show details for all hosts in I<hostgroup>
 
-=item B<-h>/B<--host> I<host>
+=item B<-h>|B<--host> I<host>
 
 Only show I<host>'s services
 
-=item B<-l>/B<--list> B<hosts>|B<services>
+=item B<-l>|B<--list> B<hosts>|B<services>
 
 List either services (the default) or hosts.
-Note that only the first character of the argument is checked, so C<< icinga
--lh >> and C<< icinga -ls >> are also fine.
+Note that only the first character of the argument is checked, so C<< icli
+-lh >> and C<< icli -ls >> are also fine.
 
-=item B<-s>/B<--short>
+=item B<-s>|B<--short>
 
 Only show services which are not OK
 
+=item B<-V>|B<--version>
+
+Show version information
+
 =back
+
+The argument to B<-g> and B<-h> may also be comma-separated list of
+hosts/hostgroups, e.g. C<< icli -h aneurysm,kraftwerk >>.
 
 =head1 EXIT STATUS
 
