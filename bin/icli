@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use 5.010;
 
+use Date::Format;
 use Getopt::Long qw/:config bundling/;
 use Term::ANSIColor;
 
@@ -36,6 +37,11 @@ sub with_colour {
 	else {
 		return $text;
 	}
+}
+
+sub pretty_date {
+	my ($unix) = @_;
+	return time2str('%Y-%m-%d %H:%M:%S', $unix);
 }
 
 sub read_objects_line {
@@ -115,6 +121,37 @@ sub host_state {
 		when(1) { return with_colour('   DOWN    ', 'white on_red'  ) }
 		when(2) { return with_colour('UNREACHABLE', 'white on_blue' ) }
 		default { die("Unknown host state: $digit\n") }
+	}
+}
+
+sub display_queue {
+	my @queue = map  { $_->[0] }
+	            sort { $a->[1] <=> $b->[1] }
+	            map  { [$_, $_->{next_check}] }
+	                 (values %{$data->{hosts}},
+	                  map { @{$_} } values %{$data->{services}});
+
+	printf(
+		"%-25.25s  %-20.20s  %-19s  %-19s\n",
+		'Host',
+		'Service',
+		'Last Check',
+		'Next Check',
+	);
+
+	for my $e (@queue) {
+
+		if ($e->{next_check} == 0) {
+			next;
+		}
+
+		printf(
+			"%-25.25s  %-20.20s  %-19s  %-19s\n",
+			$e->{host_name},
+			$e->{service_description} // q{},
+			pretty_date($e->{last_check}),
+			pretty_date($e->{next_check}),
+		);
 	}
 }
 
@@ -225,6 +262,9 @@ elsif ($list_type eq 'h') {
 		display_host($host, 1);
 	}
 }
+elsif ($list_type eq 'q') {
+	display_queue();
+}
 else {
 	die("See perldoc -F $0\n");
 }
@@ -270,11 +310,11 @@ Show details for all hosts in I<hostgroup>
 
 Only show I<host>'s services
 
-=item B<-l>|B<--list> B<hosts>|B<services>
+=item B<-l>|B<--list> B<hosts>|B<services>|B<queue>
 
 List either services (the default) or hosts.
 Note that only the first character of the argument is checked, so C<< icli
--lh >> and C<< icli -ls >> are also fine.
+-lh >>, C<< icli -ls >> etc. are also fine.
 
 =item B<-s>|B<--short>
 
