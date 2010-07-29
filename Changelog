@@ -1,0 +1,4 @@
+icli 0.1 - Thu Jul 29 2010
+
+    * First release
+    * listing of service/host states, filtered by hosts/hostgroups
