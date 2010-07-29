@@ -131,6 +131,10 @@ sub display_queue {
 	                 (values %{$data->{hosts}},
 	                  map { @{$_} } values %{$data->{services}});
 
+	if (@for_hosts) {
+		@queue = grep { $_->{host_name} ~~ \@for_hosts } @queue;
+	}
+
 	printf(
 		"%-25.25s  %-20.20s  %-19s  %-19s\n",
 		'Host',
@@ -239,7 +243,7 @@ foreach my $group (@for_groups) {
 	}
 }
 
-if (@for_hosts) {
+if (@for_hosts and $list_type ~~ [qw/s h/]) {
 	foreach my $host (@for_hosts) {
 		if (have_host($host)) {
 			display_host(

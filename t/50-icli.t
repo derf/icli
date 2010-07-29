@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use 5.010;
 
-use Test::Command tests => (21*3);
+use Test::Command tests => (22*3);
 
 my $icli = 'bin/icli -f t/in/status.dat -c t/in/objects.cache';
 
@@ -78,6 +78,11 @@ $cmd->stderr_is_eq($EMPTY);
 $cmd = Test::Command->new(cmd => "$icli -lq");
 $cmd->exit_is_num(0);
 $cmd->stdout_is_file('t/out/list_queue');
+$cmd->stderr_is_eq($EMPTY);
+
+$cmd = Test::Command->new(cmd => "$icli -lq -h aneurysm");
+$cmd->exit_is_num(0);
+$cmd->stdout_is_file('t/out/list_queue_aneurysm');
 $cmd->stderr_is_eq($EMPTY);
 
 
