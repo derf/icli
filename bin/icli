@@ -104,7 +104,12 @@ sub enhance_status {
 }
 
 sub service_state {
-	my ($digit) = @_;
+	my ($checked, $digit) = @_;
+
+	if (not $checked) {
+		return 'PENDING ';
+	}
+
 	given ($digit) {
 		when(0) { return with_colour('   OK   ', 'black on_green' ) }
 		when(1) { return with_colour(' WARNING', 'black on_yellow') }
@@ -115,7 +120,12 @@ sub service_state {
 }
 
 sub host_state {
-	my ($digit) = @_;
+	my ($checked, $digit) = @_;
+
+	if (not $checked) {
+		return '  PENDING  ';
+	}
+
 	given($digit) {
 		when(0) { return with_colour('    OK     ', 'black on_green') }
 		when(1) { return with_colour('   DOWN    ', 'white on_red'  ) }
@@ -164,7 +174,7 @@ sub display_service {
 	printf(
 		"%-20.20s %s %s\n",
 		$s->{service_description},
-		service_state($s->{current_state}),
+		service_state($s->{has_been_checked}, $s->{current_state}),
 		$s->{plugin_output},
 	);
 }
@@ -201,7 +211,7 @@ sub display_host_single {
 	printf(
 		"%-32.32s %s %s\n",
 		$h->{host_name},
-		host_state($h->{current_state}),
+		host_state($h->{has_been_checked}, $h->{current_state}),
 		$h->{plugin_output},
 	);
 }
