@@ -69,7 +69,7 @@ hoststatus {
 	retry_interval=1.000000
 	event_handler=
 	has_been_checked=1
-	should_be_scheduled=1
+	should_be_scheduled=0
 	check_execution_time=0.015
 	check_latency=0.230
 	check_type=0
@@ -178,7 +178,7 @@ hoststatus {
 	check_interval=5.000000
 	retry_interval=1.000000
 	event_handler=
-	has_been_checked=1
+	has_been_checked=0
 	should_be_scheduled=1
 	check_execution_time=0.032
 	check_latency=0.089
@@ -973,7 +973,7 @@ servicestatus {
 	check_interval=5.000000
 	retry_interval=1.000000
 	event_handler=
-	has_been_checked=1
+	has_been_checked=0
 	should_be_scheduled=0
 	check_execution_time=0.000
 	check_latency=0.579

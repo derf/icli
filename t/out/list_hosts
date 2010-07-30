@@ -1,4 +1,4 @@
 alpha                            [37;41m   DOWN    [0m PING OK - Packet loss = 0%, RTA = 0.73 ms
 aneurysm                         [37;44mUNREACHABLE[0m PING OK - Packet loss = 0%, RTA = 0.10 ms
-steel-vpn                        [30;42m    OK     [0m PING OK - Packet loss = 0%, RTA = 18.01 ms
+steel-vpn                          PENDING   PING OK - Packet loss = 0%, RTA = 18.01 ms
 steel.derf0.net                  [30;42m    OK     [0m PING OK - Packet loss = 0%, RTA = 16.75 ms
