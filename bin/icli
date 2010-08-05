@@ -8,7 +8,7 @@ use Date::Format;
 use Getopt::Long qw/:config bundling/;
 use Term::ANSIColor;
 
-my $version = '0.1+git';
+my $VERSION = '0.1+git';
 
 my ($cache, $config, $data, $extra);
 my $config_file = '/var/cache/icinga/objects.cache';
@@ -235,7 +235,7 @@ GetOptions(
 	'h|host=s'        => sub { push(@for_hosts, split(/,/, $_[1])) },
 	'l|list=s'        => sub { $list_type = substr($_[1], 0, 1) },
 	's|short'         => \$short,
-	'V|version'       => sub { say "icli version $version"; exit 0 },
+	'V|version'       => sub { say "icli version $VERSION"; exit 0 },
 );
 
 read_objects($status_file, \$data);
