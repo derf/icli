@@ -6,16 +6,14 @@ Requires:
 
 Installation:
 
- > make
- > sudo make install
+ > perl Build.PL
+ > ./Build
+ > ./Build test
+ > sudo ./Build install
 
 You can then run 'man icli' for more information.
 
-Testing:
-
- > make test
-
-Requires the following additional perl modules:
+Extra modules required for testing:
  * Test::More
  * Test::Compile
  * Test::Pod
