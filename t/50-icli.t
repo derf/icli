@@ -110,7 +110,7 @@ $cmd->stderr_is_eq("See perldoc -F bin/icli\n");
 $icli = "bin/icli -f t/in/status.dat.weird.1 -c t/in/objects.cache";
 
 $cmd = Test::Command->new(cmd => $icli);
-$cmd->exit_isnt_num(0);
+$cmd->exit_is_num(0);
 $cmd->stdout_is_eq($EMPTY);
 $cmd->stderr_is_eq("Unknown field in t/in/status.dat.weird.1: bork\n");
 

@@ -54,27 +54,33 @@ sub read_objects_line {
 		$cache->{$+{key}} = $+{value};
 	}
 	elsif ($line =~ / ^ \t } $ /x) {
-		given($context) {
-			when(['info', 'programstatus']) {
+		given ($context) {
+			when (['info', 'programstatus']) {
 				${$ref}->{$context} = $cache;
 			}
-			when('hoststatus') {
+			when ('hoststatus') {
 				${$ref}->{hosts}->{$cache->{host_name}} = $cache;
 			}
-			when('servicestatus') {
+			when ('servicestatus') {
 				push(@{${$ref}->{services}->{$cache->{host_name}}}, $cache);
 			}
-			when('contactstatus') {
+			when ('contactstatus') {
 				push(@{${$ref}->{contacts}}, $cache);
 			}
-			when('hostgroup') {
+			when ('hostgroup') {
 				${$ref}->{hostgroups}->{$cache->{hostgroup_name}} = $cache;
 			}
-			when([qw[timeperiod command contactgroup contact host service]]) {
+			when ('hostcomment') {
+				# TODO
+			}
+			when ('servicecomment') {
+				# TODO
+			}
+			when ([qw[timeperiod command contactgroup contact host service]]) {
 				# skipped for now
 			}
 			default {
-				die("Unknown field in $status_file: $context\n");
+				warn("Unknown field in $status_file: $context\n");
 			}
 		}
 		$cache = undef;
