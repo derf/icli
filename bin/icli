@@ -17,6 +17,7 @@ my $context;
 my $colours = 1;
 my $short = 0;
 my $list_type = 's';
+my $verbosity = 1;
 my (@for_hosts, @for_groups);
 
 sub have_host {
@@ -177,12 +178,26 @@ sub display_queue {
 
 sub display_service {
 	my ($s) = @_;
-	printf(
-		"%-20.20s %s %s\n",
-		$s->{service_description},
-		service_state($s->{has_been_checked}, $s->{current_state}),
-		$s->{plugin_output},
-	);
+
+	given ($verbosity) {
+		when (1) {
+			printf(
+				"%-20.20s %s %s\n",
+				$s->{service_description},
+				service_state($s->{has_been_checked}, $s->{current_state}),
+				$s->{plugin_output},
+			);
+		}
+		when (2) {
+			printf("%-20.20s %s %d/%d %s\n",
+				$s->{service_description},
+				service_state($s->{has_been_checked}, $s->{current_state}),
+				$s->{current_attempt},
+				$s->{max_attempts},
+				$s->{plugin_output},
+			);
+		}
+	}
 }
 
 sub display_host_services {
@@ -241,6 +256,7 @@ GetOptions(
 	'h|host=s'        => sub { push(@for_hosts, split(/,/, $_[1])) },
 	'l|list=s'        => sub { $list_type = substr($_[1], 0, 1) },
 	's|short'         => \$short,
+	'v|verbose+'      => \$verbosity,
 	'V|version'       => sub { say "icli version $VERSION"; exit 0 },
 );
 
