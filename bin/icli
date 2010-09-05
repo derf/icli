@@ -179,25 +179,16 @@ sub display_queue {
 sub display_service {
 	my ($s) = @_;
 
-	given ($verbosity) {
-		when (1) {
-			printf(
-				"%-20.20s %s %s\n",
-				$s->{service_description},
-				service_state($s->{has_been_checked}, $s->{current_state}),
-				$s->{plugin_output},
-			);
-		}
-		when (2) {
-			printf("%-20.20s %s %d/%d %s\n",
-				$s->{service_description},
-				service_state($s->{has_been_checked}, $s->{current_state}),
-				$s->{current_attempt},
-				$s->{max_attempts},
-				$s->{plugin_output},
-			);
-		}
+	my $v = $verbosity;
+
+	printf("%-20.20s", $s->{service_description});
+	printf(" %s"     , service_state($s->{'has_been_checked'}, $s->{'current_state'}));
+
+	if ($v >= 2) {
+		printf(" %d/%d", $s->{'current_attempt'}, $s->{'max_attempts'});
 	}
+
+	printf(" %s\n", $s->{'plugin_output'});
 }
 
 sub display_host_services {
@@ -224,17 +215,20 @@ sub display_host_services {
 sub display_host_single {
 	my ($host) = @_;
 	my $h = $data->{hosts}->{$host};
+	my $v = $verbosity;
 
 	if ($short and not $h->{current_state}) {
 		return;
 	}
 
-	printf(
-		"%-32.32s %s %s\n",
-		$h->{host_name},
-		host_state($h->{has_been_checked}, $h->{current_state}),
-		$h->{plugin_output},
-	);
+	printf("%-32.32s", $h->{'host_name'});
+	printf(" %s", host_state($h->{'has_been_checked'}, $h->{'current_state'}));
+
+	if ($v >= 2) {
+		printf(" %d/%d", $h->{'current_attempt'}, $h->{'max_attempts'});
+	}
+
+	printf(" %s\n", $h->{'plugin_output'});
 }
 
 sub display_host {

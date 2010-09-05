@@ -118,10 +118,10 @@ $icli = "bin/icli -f t/in/status.dat.weird.2 -c t/in/objects.cache";
 
 $cmd = Test::Command->new(cmd => "$icli -lh -h alpha");
 $cmd->exit_isnt_num(0);
-$cmd->stdout_is_eq($EMPTY);
+$cmd->stdout_is_eq('alpha                           ');
 $cmd->stderr_is_eq("Unknown host state: 23\n");
 
 $cmd = Test::Command->new(cmd => "$icli -ls -h aneurysm");
 $cmd->exit_isnt_num(0);
-$cmd->stdout_is_eq($EMPTY);
+$cmd->stdout_is_eq('Disk: /             ');
 $cmd->stderr_is_eq("Unknown service state: 23\n");
