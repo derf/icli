@@ -1,4 +1,7 @@
 #!/usr/bin/env perl
+## Copyright © 2010 by Daniel Friesel <derf@finalrewind.org>
+## License: WTFPL <http://sam.zoy.org/wtfpl>
+##   0. You just DO WHAT THE FUCK YOU WANT TO.
 use autodie;
 use strict;
 use warnings;
@@ -378,7 +381,7 @@ a lot.
 
 =head1 AUTHOR
 
-Copyright (C) 2010 by Daniel Friesel E<lt>derf@chaosdorf.deE<gt>
+Copyright (C) 2010 by Daniel Friesel E<lt>derf@finalrewind.orgE<gt>
 
 =head1 LICENSE
 
