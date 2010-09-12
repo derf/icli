@@ -71,6 +71,9 @@ sub read_objects_line {
 			when ('contactstatus') {
 				push(@{${$ref}->{contacts}}, $cache);
 			}
+			when ('hostdowntime') {
+				push(@{${$ref}->{downtimes}}, $cache);
+			}
 			when ('hostgroup') {
 				${$ref}->{hostgroups}->{$cache->{hostgroup_name}} = $cache;
 			}
@@ -80,7 +83,11 @@ sub read_objects_line {
 			when ('servicecomment') {
 				# TODO
 			}
-			when ([qw[timeperiod command contactgroup contact host service]]) {
+			when ([qw[
+				timeperiod command contactgroup contact host service
+				servicedependency
+				]])
+			{
 				# skipped for now
 			}
 			default {
