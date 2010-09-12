@@ -186,6 +186,35 @@ sub display_queue {
 	}
 }
 
+sub display_downtime {
+	my ($d) = @_;
+	my $v = $verbosity;
+
+	printf('%-20.20s', $d->{'host_name'});
+
+	if ($v >= 3) {
+		printf(
+			' %s %-10.10s',
+			pretty_date($d->{'entry_time'}),
+			$d->{'author'},
+		);
+	}
+	if ($v >= 2) {
+		printf(' %-30.30s', $d->{'comment'});
+	}
+	printf(
+		' %s %s',
+		pretty_date($d->{'start_time'}),
+		pretty_date($d->{'end_time'}),
+	);
+	if ($v >= 2) {
+		print ($d->{'fixed'} ? ' Fixed' : ' Flexi');
+	}
+
+	print "\n";
+}
+
+
 sub display_service {
 	my ($s) = @_;
 
@@ -195,7 +224,7 @@ sub display_service {
 	printf(" %s"     , service_state($s->{'has_been_checked'}, $s->{'current_state'}));
 
 	if ($v >= 2) {
-		printf(" %d/%d", $s->{'current_attempt'}, $s->{'max_attempts'});
+		printf(' %d/%d', $s->{'current_attempt'}, $s->{'max_attempts'});
 	}
 
 	printf(" %s\n", $s->{'plugin_output'});
@@ -304,6 +333,11 @@ elsif ($list_type eq 'h') {
 }
 elsif ($list_type eq 'q') {
 	display_queue();
+}
+elsif ($list_type eq 'd') {
+	foreach my $downtime (@{$data->{downtimes}}) {
+		display_downtime($downtime);
+	}
 }
 else {
 	die("See perldoc -F $0\n");
