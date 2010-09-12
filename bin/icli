@@ -190,7 +190,7 @@ sub display_downtime {
 	my ($d) = @_;
 	my $v = $verbosity;
 
-	printf('%-20.20s', $d->{'host_name'});
+	printf('%-27.27s', $d->{'host_name'});
 
 	if ($v >= 3) {
 		printf(
