@@ -384,7 +384,7 @@ Show details for all hosts in I<hostgroup>
 
 Only show I<host>'s services
 
-=item B<-l>|B<--list> B<hosts>|B<services>|B<queue>
+=item B<-l>|B<--list> B<downtimes>|B<hosts>|B<services>|B<queue>
 
 List either services (the default) or hosts.
 Note that only the first character of the argument is checked, so C<< icli
