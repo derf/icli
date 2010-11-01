@@ -21,7 +21,8 @@ my $colours = 1;
 my $short = 0;
 my $list_type = 's';
 my $verbosity = 1;
-my (@for_hosts, @for_groups);
+my $recheck = 0;
+my (@for_hosts, @for_groups, @for_services);
 
 sub have_host {
 	my ($host) = @_;
@@ -31,6 +32,17 @@ sub have_host {
 	else {
 		return exists $data->{hosts}->{$host};
 	}
+}
+
+sub have_service {
+	my ($host, $service) = @_;
+
+	foreach my $s (@{$data->{services}->{$host}}) {
+		if ($s->{service_description} eq $service) {
+			return 1;
+		}
+	}
+	return 0;
 }
 
 sub with_colour {
@@ -46,6 +58,10 @@ sub with_colour {
 sub pretty_date {
 	my ($unix) = @_;
 	return time2str('%Y-%m-%d %H:%M:%S', $unix);
+}
+
+sub unix_time {
+	return time2str('%s', localtime(time));
 }
 
 sub read_objects_line {
@@ -76,6 +92,9 @@ sub read_objects_line {
 			}
 			when ('hostgroup') {
 				${$ref}->{hostgroups}->{$cache->{hostgroup_name}} = $cache;
+			}
+			when('servicegroup') {
+				${$ref}->{servicegroups}->{$cache->{servicegroup_name}} = $cache;
 			}
 			when ('hostcomment') {
 				# TODO
@@ -281,6 +300,36 @@ sub display_host {
 	}
 }
 
+sub dispatch_command {
+	my $str = join(';', @_);
+
+	open(my $cmd_fh, '>', '/var/lib/icinga/rw/icinga.cmd') or die("Can't open: $!");
+	printf $cmd_fh (
+		"[%d] %s",
+		unix_time(),
+		$str,
+	);
+	close($cmd_fh) or die("Can't close: $!");
+}
+
+
+sub recheck_host_all {
+	my ($host) = @_;
+
+	dispatch_command('SCHEDULE_HOST_SVC_CHECKS', $host, unix_time());
+	say "Scheduled check of * on '$host'";
+}
+
+sub recheck_service {
+	my ($host, $service) = @_;
+
+	if (have_service($host, $service)) {
+		dispatch_command('SCHEDULE_SVC_CHECK', $host, $service,
+			unix_time());
+		say "Scheduled check of '$service' on '$host'";
+	}
+}
+
 GetOptions(
 	'c|config=s'      => \$config_file,
 	'C|no-colours'    => sub { $colours = 0 },
@@ -288,9 +337,11 @@ GetOptions(
 	'g|hostgroup=s'   => sub { push(@for_groups, split(/,/, $_[1])) },
 	'h|host=s'        => sub { push(@for_hosts, split(/,/, $_[1])) },
 	'l|list=s'        => sub { $list_type = substr($_[1], 0, 1) },
-	's|short'         => \$short,
+	'r|recheck'       => sub { $recheck = 1; $list_type = q{} },
+	's|service=s'     => sub { push(@for_services, split(/,/, $_[1])) },
 	'v|verbose+'      => \$verbosity,
 	'V|version'       => sub { say "icli version $VERSION"; exit 0 },
+	'x|critical-only' => \$short,
 );
 
 read_objects($status_file, \$data);
@@ -337,6 +388,27 @@ elsif ($list_type eq 'q') {
 elsif ($list_type eq 'd') {
 	foreach my $downtime (@{$data->{downtimes}}) {
 		display_downtime($downtime);
+	}
+}
+elsif ($recheck) {
+	if (@for_hosts) {
+		foreach my $host (@for_hosts) {
+			if (have_host($host) and not @for_services) {
+				recheck_host_all($host);
+			}
+			elsif (have_host($host)) {
+				foreach my $service (@for_services) {
+					recheck_service($host, $service);
+				}
+			}
+		}
+	}
+	else {
+		foreach my $host (sort keys %{$data->{services}}) {
+			foreach my $service (@for_services) {
+				recheck_service($host, $service);
+			}
+		}
 	}
 }
 else {
