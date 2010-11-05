@@ -60,10 +60,6 @@ sub pretty_date {
 	return time2str('%Y-%m-%d %H:%M:%S', $unix);
 }
 
-sub unix_time {
-	return time2str('%s', localtime(time));
-}
-
 sub read_objects_line {
 	my ($line, $ref) = @_;
 
@@ -306,7 +302,7 @@ sub dispatch_command {
 	open(my $cmd_fh, '>', '/var/lib/icinga/rw/icinga.cmd') or die("Can't open: $!");
 	printf $cmd_fh (
 		"[%d] %s",
-		unix_time(),
+		time(),
 		$str,
 	);
 	close($cmd_fh) or die("Can't close: $!");
@@ -316,7 +312,7 @@ sub dispatch_command {
 sub recheck_host_all {
 	my ($host) = @_;
 
-	dispatch_command('SCHEDULE_HOST_SVC_CHECKS', $host, unix_time());
+	dispatch_command('SCHEDULE_HOST_SVC_CHECKS', $host, time());
 	say "Scheduled check of * on '$host'";
 }
 
@@ -325,7 +321,7 @@ sub recheck_service {
 
 	if (have_service($host, $service)) {
 		dispatch_command('SCHEDULE_SVC_CHECK', $host, $service,
-			unix_time());
+			time());
 		say "Scheduled check of '$service' on '$host'";
 	}
 }
