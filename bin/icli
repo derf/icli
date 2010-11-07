@@ -45,6 +45,17 @@ sub have_service {
 	return 0;
 }
 
+sub have_service_multi {
+	my ($host, @services) = @_;
+
+	foreach my $s (@services) {
+		if (have_service($host, $s)) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
 sub with_colour {
 	my ($text, $colour) = @_;
 	if ($colours) {
@@ -254,7 +265,11 @@ sub display_host_services {
 
 	foreach my $service (@{$data->{services}->{$host}}) {
 
-		if ($short and not $service->{current_state}) {
+		if (
+				($short and not $service->{current_state})
+				or (@for_services and not
+					($service->{service_description} ~~ [@for_services])
+				)) {
 			next;
 		}
 
@@ -370,7 +385,10 @@ if (@for_hosts and $list_type ~~ [qw/s h/]) {
 }
 elsif ($list_type eq 's') {
 	foreach my $host (sort keys %{$data->{services}}) {
-		display_host($host, 1);
+		if (not (@for_services and not have_service_multi($host,
+				@for_services))) {
+			display_host($host, 1);
+		}
 	}
 }
 elsif ($list_type eq 'h') {
