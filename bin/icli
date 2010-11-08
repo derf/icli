@@ -422,6 +422,11 @@ __END__
 
 =head1 NAME
 
+B<icli> [B<-x>] [B<-h> I<hosts>] [B<-g> I<hostgroups>] [B<-s> I<services>]
+[B<-c> I<config>] [B<-C>] [B<-f> I<status-file>]
+[B<-r>|B<-lh>|B<-ls>|B<-lq>|B<-ld>]
+
+
 B<icli> - Icinga Command Line Interface
 
 =head1 SYNOPSIS
@@ -453,11 +458,11 @@ F</var/lib/icinga/status.dat>
 
 =item B<-g>|B<--hostgroup> I<hostgroup>
 
-Show details for all hosts in I<hostgroup>
+Limit selection to hosts in I<hostgroup>
 
-=item B<-h>|B<--host> I<host>
+=item B<-h>|B<--host> I<host>1,I<host2>,I<...>
 
-Only show I<host>'s services
+Limit selection to I<hosts> (comma separated list)
 
 =item B<-l>|B<--list> B<downtimes>|B<hosts>|B<services>|B<queue>
 
@@ -465,7 +470,11 @@ List either services (the default) or hosts.
 Note that only the first character of the argument is checked, so C<< icli
 -lh >>, C<< icli -ls >> etc. are also fine.
 
-=item B<-s>|B<--short>
+=item B<-r>|B<--recheck>
+
+Schedule an immediate recheck of all selected services
+
+=item B<-x>|B<--short>
 
 Only show services which are not OK
 
@@ -494,6 +503,21 @@ None, so far.
 
 This software is in early development stages. So there will probably be quite
 a lot.
+
+=head1 EXAMPLES
+
+=over
+
+=item C<< icli -r -s 'APT Updates' >>
+
+Schedule a check of the "APT Updates" service on all hosts having it
+
+=item C<< icli -lq -h aneurysm -g chaosdorf-hosts >>
+
+List check queue for all hosts in the hostgroup "chaosdorf-hosts", plus the
+host aneurysm
+
+=back
 
 =head1 AUTHOR
 
