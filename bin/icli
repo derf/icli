@@ -16,6 +16,7 @@ my $VERSION = '0.1';
 my ($cache, $config, $data, $extra);
 my $config_file = '/var/cache/icinga/objects.cache';
 my $status_file = '/var/lib/icinga/status.dat';
+my $rw_file     = '/var/lib/icinga/rw/icinga.cmd';
 my $context;
 my $colours = 1;
 my $short = 0;
@@ -316,13 +317,13 @@ sub display_host {
 sub dispatch_command {
 	my $str = join(';', @_);
 
-	open(my $cmd_fh, '>', '/var/lib/icinga/rw/icinga.cmd') or die("Can't open: $!");
+	open(my $cmd_fh, '>', $rw_file);
 	printf $cmd_fh (
 		"[%d] %s",
 		time(),
 		$str,
 	);
-	close($cmd_fh) or die("Can't close: $!");
+	close($cmd_fh);
 }
 
 
@@ -347,6 +348,7 @@ GetOptions(
 	'c|config=s'      => \$config_file,
 	'C|no-colours'    => sub { $colours = 0 },
 	'f|status-file=s' => \$status_file,
+	'F|rw-file=s'     => \$rw_file,
 	'g|hostgroup=s'   => sub { push(@for_groups, split(/,/, $_[1])) },
 	'h|host=s'        => sub { push(@for_hosts, split(/,/, $_[1])) },
 	'l|list=s'        => sub { $list_type = substr($_[1], 0, 1) },
@@ -455,6 +457,11 @@ Disable colours in output
 
 Read the status from I<file> instead of the default
 F</var/lib/icinga/status.dat>
+
+=item B<-F>|B<--rw-file> I<file>
+
+Use I<file> as external commands file. Default:
+F</var/lib/icinga/rw/icinga.cmd>
 
 =item B<-g>|B<--hostgroup> I<hostgroup>
 
