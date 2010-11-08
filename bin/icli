@@ -184,8 +184,10 @@ sub display_queue {
 	                 (values %{$data->{hosts}},
 	                  map { @{$_} } values %{$data->{services}});
 
-	if (@for_hosts) {
-		@queue = grep { $_->{host_name} ~~ \@for_hosts } @queue;
+	@queue = grep { $_->{host_name} ~~ \@list_hosts } @queue;
+
+	if (@list_services) {
+		@queue = grep { $_->{service_description} ~~ \@list_services } @queue;
 	}
 
 	printf(
