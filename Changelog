@@ -1,3 +1,9 @@
+icli 0.2 - Mon Nov 08 2010
+
+    * List downtimes and check queue
+    * Reschedule service checks
+    * Filter by host/hostgroup and/or service name
+
 icli 0.1 - Thu Jul 29 2010
 
     * First release
