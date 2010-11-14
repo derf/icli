@@ -357,7 +357,8 @@ GetOptions(
 	'v|verbose+'      => \$verbosity,
 	'V|version'       => sub { say "icli version $VERSION"; exit 0 },
 	'x|critical-only' => \$short,
-);
+)
+	or die("Please see perldoc -F $0 for help\n");
 
 read_objects($status_file, \$data);
 read_objects($config_file, \$config);
