@@ -463,9 +463,9 @@ F</var/lib/icinga/rw/icinga.cmd>
 
 =item B<-g>|B<--hostgroup> I<hostgroup>
 
-Limit selection to hosts in I<hostgroup>
+Limit selection to hosts in I<hostgroup> (comma separated list)
 
-=item B<-h>|B<--host> I<host>1,I<host2>,I<...>
+=item B<-h>|B<--host> I<hosts>
 
 Limit selection to I<hosts> (comma separated list)
 
@@ -479,6 +479,12 @@ Note that only the first character of the argument is checked, so C<< icli
 
 Schedule an immediate recheck of all selected services
 
+=item B<-s>|B<--service> I<services>
+
+Limit selection to I<services> (comma separated lists).  Can be combined with
+B<-h>/B<-g> to further narrow down the selection, but may also be used
+stand-alone.
+
 =item B<-x>|B<--short>
 
 Only show services which are not OK
@@ -488,9 +494,6 @@ Only show services which are not OK
 Show version information
 
 =back
-
-The argument to B<-g> and B<-h> may also be comma-separated list of
-hosts/hostgroups, e.g. C<< icli -h aneurysm,kraftwerk >>.
 
 =head1 EXIT STATUS
 
