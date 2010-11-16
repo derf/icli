@@ -425,16 +425,13 @@ __END__
 
 =head1 NAME
 
-B<icli> [B<-x>] [B<-h> I<hosts>] [B<-g> I<hostgroups>] [B<-s> I<services>]
-[B<-c> I<config>] [B<-C>] [B<-f> I<status-file>]
-[B<-r>|B<-lh>|B<-ls>|B<-lq>|B<-ld>]
-
-
 B<icli> - Icinga Command Line Interface
 
 =head1 SYNOPSIS
 
-B<icli> [B<-h> I<host>]
+B<icli> [B<-x>] [B<-h> I<hosts>] [B<-g> I<hostgroups>] [B<-s> I<services>]
+[B<-c> I<config>] [B<-C>] [B<-f> I<status-file>]
+[B<-r>|B<-lh>|B<-ls>|B<-lq>|B<-ld>]
 
 =head1 DESCRIPTION
 
