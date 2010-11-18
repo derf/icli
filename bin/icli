@@ -72,6 +72,21 @@ sub pretty_date {
 	return time2str('%Y-%m-%d %H:%M:%S', $unix);
 }
 
+sub filter_service {
+	my ($s) = @_;
+
+	if ($short and not $s->{'current_state'}) {
+		return 0;
+	}
+
+	if (@list_services and not ($s->{'service_description'} ~~
+			[@list_services])) {
+		return 0;
+	}
+
+	return 1;
+}
+
 sub read_objects_line {
 	my ($line, $ref) = @_;
 
@@ -282,20 +297,15 @@ sub display_service {
 
 sub display_host_services {
 	my ($host, $all) = @_;
+	my @services;
 
-	if ($all and (not $short or $extra->{$host}->{service_problem})) {
+	@services = grep { filter_service($_) } @{$data->{'services'}->{$host}};
+
+	if ($all and @services) {
 		say "\n$host";
 	}
 
-	foreach my $service (@{$data->{services}->{$host}}) {
-
-		if (
-				($short and not $service->{current_state})
-				or (@list_services and not
-					($service->{service_description} ~~ [@list_services])
-				)) {
-			next;
-		}
+	foreach my $service (@services) {
 
 		if ($all) {
 			print "\t";
