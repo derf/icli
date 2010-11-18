@@ -740,6 +740,11 @@ Schedule a check of the "APT Updates" service on all hosts having it
 List check queue for all hosts in the hostgroup "chaosdorf-hosts", plus the
 host aneurysm
 
+=item C<< icli -z!o,!A,!S >>
+
+Show all service problems which are already hard states and have not yet been
+acknowledged
+
 =back
 
 =head1 AUTHOR
