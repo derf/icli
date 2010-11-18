@@ -72,10 +72,20 @@ sub pretty_date {
 	return time2str('%Y-%m-%d %H:%M:%S', $unix);
 }
 
+sub filter_generic {
+	my ($x) = @_;
+
+	if ($short and not $x->{'current_state'}) {
+		return 0;
+	}
+
+	return 1;
+}
+
 sub filter_host {
 	my ($h) = @_;
 
-	if ($short and not $h->{'current_state'}) {
+	if (not filter_generic($h)) {
 		return 0;
 	}
 
@@ -85,7 +95,7 @@ sub filter_host {
 sub filter_service {
 	my ($s) = @_;
 
-	if ($short and not $s->{'current_state'}) {
+	if (not filter_generic($s)) {
 		return 0;
 	}
 
@@ -394,6 +404,7 @@ GetOptions(
 	'v|verbose+'      => \$verbosity,
 	'V|version'       => sub { say "icli version $VERSION"; exit 0 },
 	'x|critical-only' => \$short,
+	'z|filter=s'      => sub { push(@filters, split(/,/, $_[1])) },
 )
 	or die("Please see perldoc -F $0 for help\n");
 
