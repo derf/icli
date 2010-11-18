@@ -72,6 +72,16 @@ sub pretty_date {
 	return time2str('%Y-%m-%d %H:%M:%S', $unix);
 }
 
+sub filter_host {
+	my ($h) = @_;
+
+	if ($short and not $h->{'current_state'}) {
+		return 0;
+	}
+
+	return 1;
+}
+
 sub filter_service {
 	my ($s) = @_;
 
@@ -320,10 +330,6 @@ sub display_host_single {
 	my $h = $data->{hosts}->{$host};
 	my $v = $verbosity;
 
-	if ($short and not $h->{current_state}) {
-		return;
-	}
-
 	printf("%-32.32s", $h->{'host_name'});
 	printf(" %s", host_state($h->{'has_been_checked'}, $h->{'current_state'}));
 
@@ -421,6 +427,10 @@ if (@list_hosts == 0) {
 
 if (@list_services) {
 	@list_hosts = grep { have_service_multi($_, @list_services) } @list_hosts;
+}
+
+if ($list_type eq 'h') {
+	@list_hosts = grep { filter_host($data->{'hosts'}->{$_}) } @list_hosts;
 }
 
 if ($list_type ~~ [qw[s h]]) {
