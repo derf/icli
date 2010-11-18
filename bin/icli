@@ -590,6 +590,11 @@ None, so far.
 This software is in early development stages. So there will probably be quite
 a lot.
 
+=head2 REPORTING BUGS
+
+Either via mail to E<lt>derf@finalrewind.orgE<gt> or on
+E<lt>http://github.com/derf/icinga-cli/issuesE<gt>.
+
 =head1 EXAMPLES
 
 =over
