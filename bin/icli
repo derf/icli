@@ -89,7 +89,19 @@ sub filter_generic {
 			($f eq '!F' and not $x->{'is_flapping'}) or
 			($f eq  'P' and     $x->{'passive_checks_enabled'}
 			            and not $x->{'active_checks_enabled'}) or
-			($f eq '!P' and     $x->{'active_checks_enabled'})
+			($f eq '!P' and     $x->{'active_checks_enabled'}) or
+			($f eq  'o' and     $x->{'current_state'} == 0) or
+			($f eq '!o' and     $x->{'current_state'} != 0) or
+			($f eq  'w' and     $x->{'current_state'} == 1) or
+			($f eq '!w' and     $x->{'current_state'} != 1) or
+			($f eq  'c' and     $x->{'current_state'} == 2) or
+			($f eq '!c' and     $x->{'current_state'} != 2) or
+			($f eq  'u' and     $x->{'current_state'} == 3) or
+			($f eq '!u' and     $x->{'current_state'} != 3) or
+			($f eq  'd' and     $x->{'current_state'} == 2) or
+			($f eq '!d' and     $x->{'current_state'} != 2) or
+
+			0 # Terminator to ease adding new lines
 		) {
 			$filters_unfulfilled--;
 		}
