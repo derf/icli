@@ -73,6 +73,13 @@ sub pretty_date {
 	return time2str('%Y-%m-%d %H:%M:%S', $unix);
 }
 
+sub check_is_soft {
+	my ($x) = @_;
+
+	return ($x->{'last_hard_state'} != $x->{'current_state'});
+}
+
+
 sub filter_generic {
 	my ($x) = @_;
 	my $filters_unfulfilled = @filters;
@@ -90,6 +97,8 @@ sub filter_generic {
 			($f eq  'P' and     $x->{'passive_checks_enabled'}
 			            and not $x->{'active_checks_enabled'}) or
 			($f eq '!P' and     $x->{'active_checks_enabled'}) or
+			($f eq  'S' and     check_is_soft($x)) or
+			($f eq '!S' and not check_is_soft($x)) or
 			($f eq  'o' and     $x->{'current_state'} == 0) or
 			($f eq '!o' and     $x->{'current_state'} != 0) or
 			($f eq  'w' and     $x->{'current_state'} == 1) or
@@ -662,6 +671,13 @@ Service is flapping between states
 
 Only passive checks are enabled.  Note that B<!P> simply means that active
 checks are enabled, no matter the status of passive checks
+
+=item B<S>
+
+Check state is soft.  For instance, it used to be OK and is now critical, but
+has not reached its maximum number and caused a notification yet.  Good to
+find (or ignore) service problems which might just be temporary, non-critical
+glitches.
 
 =item B<o>
 
