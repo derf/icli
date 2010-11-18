@@ -291,8 +291,8 @@ sub display_host_services {
 
 		if (
 				($short and not $service->{current_state})
-				or (@for_services and not
-					($service->{service_description} ~~ [@for_services])
+				or (@list_services and not
+					($service->{service_description} ~~ [@list_services])
 				)) {
 			next;
 		}
@@ -432,7 +432,7 @@ elsif ($recheck) {
 			recheck_host_all($host);
 		}
 		else {
-			foreach my $service (@for_services) {
+			foreach my $service (@list_services) {
 				recheck_service($host, $service);
 			}
 		}
