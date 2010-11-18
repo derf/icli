@@ -98,8 +98,10 @@ sub filter_generic {
 			($f eq '!c' and     $x->{'current_state'} != 2) or
 			($f eq  'u' and     $x->{'current_state'} == 3) or
 			($f eq '!u' and     $x->{'current_state'} != 3) or
-			($f eq  'd' and     $x->{'current_state'} == 2) or
-			($f eq '!d' and     $x->{'current_state'} != 2) or
+			($f eq  'd' and     $x->{'current_state'} == 1) or
+			($f eq '!d' and     $x->{'current_state'} != 1) or
+			($f eq  'x' and     $x->{'current_state'} == 2) or
+			($f eq '!x' and     $x->{'current_state'} != 2) or
 
 			0 # Terminator to ease adding new lines
 		) {
@@ -581,6 +583,11 @@ Increase output verbosity
 
 Show version information
 
+=item B<-z>|B<--filter> I<expression>
+
+comma separated list of filters, only shows services for which all filters
+match.  See L</"FILTER EXPRESSIONS">.
+
 =back
 
 =head1 OUTPUT
@@ -633,6 +640,52 @@ Enabled with -lq
 =item * Last check
 
 =item * Next check
+
+=back
+
+=head1 FILTER EXPRESSIONS
+
+Each expression can be negated with an exclamation mark, e.g. "!A" for all
+non-acknowledged services.
+
+=over
+
+=item B<A>
+
+Check state has been acknowledged
+
+=item B<F>
+
+Service is flapping between states
+
+=item B<P>
+
+Only passive checks are enabled.  Note that B<!P> simply means that active
+checks are enabled, no matter the status of passive checks
+
+=item B<o>
+
+Host/Service state is OK
+
+=item B<w>
+
+Service state is Warning
+
+=item B<c>
+
+Service state is Critical
+
+=item B<u>
+
+Service state is Unknown
+
+=item B<d>
+
+Host state is Down
+
+=item B<x>
+
+Host state is Unreachable
 
 =back
 
