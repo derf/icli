@@ -248,8 +248,29 @@ sub display_service {
 	my ($s) = @_;
 
 	my $v = $verbosity;
+	my $flags = q{};
 
 	printf("%-20.20s", $s->{service_description});
+
+	if ($v >= 2) {
+		if ($s->{'problem_has_been_acknowledged'}) {
+			$flags .= 'A';
+		}
+		if ($s->{'is_flapping'}) {
+			$flags .= 'F';
+		}
+		if ($s->{'active_checks_enabled'} == 0 and
+				$s->{'passive_checks_enabled'} == 1) {
+			$flags .= 'P';
+		}
+		if (not ($s->{'active_checks_enabled'} or
+				$s->{'passive_checks_enabled'})) {
+			$flags .= '!';
+		}
+
+		printf(" %s%-3s%s", color('bold'), $flags, color('reset'));
+	}
+
 	printf(" %s"     , service_state($s->{'has_been_checked'}, $s->{'current_state'}));
 
 	if ($v >= 2) {
@@ -489,9 +510,66 @@ stand-alone.
 
 Only show services which are not OK
 
+=item B<-v>|B<--verbose>
+
+Increase output verbosity
+
 =item B<-V>|B<--version>
 
 Show version information
+
+=back
+
+=head1 OUTPUT
+
+=head2 SERVICE LISTING
+
+This is the standard output method. It contains the following:
+
+=over
+
+=item * Service description
+
+=item * -v: Service Flags (B<A>cknowledged, B<F>lapping, B<P>assive, B<!>no
+checks)
+
+=item * Service state (ok / warning / critical / unknown)
+
+=item * -v: Current attempt / Max attempts
+
+=item * Plugin output
+
+=back
+
+=head2 HOST LISTING
+
+Enabled with -ld
+
+=over
+
+=item * Host name
+
+=item * Host state (ok / down / unreachable)
+
+=item * -v: Current attempt / Max attempts
+
+=item * Plugin output
+
+=back
+
+=head2 QUEUE LISTING
+
+Enabled with -lq
+
+=over
+
+=item * Host name
+
+=item * Service name
+
+=item * Last check
+
+=item * Next check
 
 =back
 
