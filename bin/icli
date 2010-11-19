@@ -612,8 +612,9 @@ Show version information
 
 =item B<-z>|B<--filter> I<expression>
 
-comma separated list of filters, only shows services for which all filters
-match.  See L</"FILTER EXPRESSIONS">.
+Limit selection to hosts/services passing the filter.  I<expression> is a comma
+separated list of filters, only hosts/services to which all filters apply are
+selected.  See also L</"FILTER EXPRESSIONS">.
 
 =back
 
