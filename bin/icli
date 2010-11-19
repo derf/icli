@@ -347,6 +347,9 @@ sub display_service {
 		if ($s->{'is_flapping'}) {
 			$flags .= 'F';
 		}
+		if ($s->{'notifications_enabled'} == 0) {
+			$flags .= 'N';
+		}
 		if ($s->{'active_checks_enabled'} == 0 and
 				$s->{'passive_checks_enabled'} == 1) {
 			$flags .= 'P';
@@ -548,8 +551,11 @@ B<icli> [B<-x>] [B<-h> I<hosts>] [B<-g> I<hostgroups>] [B<-s> I<services>]
 
 =head1 DESCRIPTION
 
-B<icli> is a command line interface to Icinga. By default it lists all
+B<icli> is a command line interface to B<Icinga>. By default it lists all
 services and their states.
+
+Note that when supplying custom config and status file paths, B<icli> also
+works with B<Nagios>.  100% compatibility is not guranteed, however.
 
 =head1 OPTIONS
 
@@ -689,6 +695,10 @@ The host this service belongs to is Down or Unreachable
 =item B<F>
 
 Service is flapping between states
+
+=item B<N>
+
+Notifications for this service are disabled
 
 =item B<P>
 
