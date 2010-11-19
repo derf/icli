@@ -3,6 +3,9 @@ use strict;
 use warnings;
 use 5.010;
 
+# We need commas in our qw list, they're not accidental
+no warnings 'qw';
+
 use Test::Command tests => (36*3);
 
 my $icli = 'bin/icli -f t/in/status.dat -c t/in/objects.cache';
