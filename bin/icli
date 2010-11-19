@@ -511,9 +511,17 @@ elsif ($list_type eq 'd') {
 	}
 }
 elsif ($recheck) {
+
 	foreach my $host (@list_hosts) {
-		if (not @list_services) {
+		if (not @list_services and not @filters) {
 			recheck_host_all($host);
+		}
+		elsif (not @list_services and @filters) {
+			foreach my $service (
+					grep { filter_service($_) }
+					@{$data->{'services'}->{$host}} ) {
+				recheck_service($host, $service->{'service_description'});
+			}
 		}
 		else {
 			foreach my $service (@list_services) {
