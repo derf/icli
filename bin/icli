@@ -79,6 +79,14 @@ sub check_is_soft {
 	return ($x->{'last_hard_state'} != $x->{'current_state'});
 }
 
+sub check_is_host_down {
+	my ($s) = @_;
+
+	return (
+		$data->{'hosts'}->{ $s->{'host_name'} }->{'current_state'} != 0
+	);
+}
+
 
 sub filter_generic {
 	my ($x) = @_;
@@ -92,6 +100,8 @@ sub filter_generic {
 		if (
 			($f eq  'A' and     $x->{'problem_has_been_acknowledged'}) or
 			($f eq '!A' and not $x->{'problem_has_been_acknowledged'}) or
+			($f eq  'D' and     check_is_host_down($x)) or
+			($f eq '!D' and not check_is_host_down($x)) or
 			($f eq  'F' and     $x->{'is_flapping'}) or
 			($f eq '!F' and not $x->{'is_flapping'}) or
 			($f eq  'P' and     $x->{'passive_checks_enabled'}
@@ -663,6 +673,10 @@ non-acknowledged services.
 
 Check state has been acknowledged
 
+=item B<D>
+
+The host this service belongs to is Down or Unreachable
+
 =item B<F>
 
 Service is flapping between states
@@ -740,10 +754,10 @@ Schedule a check of the "APT Updates" service on all hosts having it
 List check queue for all hosts in the hostgroup "chaosdorf-hosts", plus the
 host aneurysm
 
-=item C<< icli -z!o,!A,!S >>
+=item C<< icli -z!o,!A,!S,!D >>
 
 Show all service problems which are already hard states and have not yet been
-acknowledged
+acknowledged.  Also weed out problem services on hosts which are down anyways
 
 =back
 
