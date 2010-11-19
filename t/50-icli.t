@@ -3,13 +3,26 @@ use strict;
 use warnings;
 use 5.010;
 
-use Test::Command tests => (22*3);
+use Test::Command tests => (36*3);
 
 my $icli = 'bin/icli -f t/in/status.dat -c t/in/objects.cache';
 
 my $EMPTY = q{};
 
 my $cmd = Test::Command->new(cmd => $icli);
+
+sub run_filter_test {
+	my ($prefix, $run, $filter) = @_;
+
+	my $file = $filter;
+	$file =~ tr/,//d;
+	$file =~ tr/!/./;
+
+	$cmd = Test::Command->new(cmd => "$icli $run -z $filter");
+	$cmd->exit_is_num(0);
+	$cmd->stdout_is_file("t/out/${prefix}_${file}");
+	$cmd->stderr_is_eq($EMPTY);
+}
 
 $cmd->exit_is_num(0);
 $cmd->stdout_is_file('t/out/standard');
@@ -105,6 +118,32 @@ $cmd = Test::Command->new(cmd => "$icli -l INVALID");
 $cmd->exit_isnt_num(0);
 $cmd->stdout_is_eq($EMPTY);
 $cmd->stderr_is_eq("See perldoc -F bin/icli\n");
+
+for my $filter (qw(
+	A
+	!A,!o
+	c
+	D
+	!o
+	!o,!A,!D
+	S
+	u
+	w
+	))
+{
+	run_filter_test('filter', q{}, $filter);
+}
+
+for my $filter (qw(
+	d
+	!o
+	S
+	S,!x,!A
+	x
+	))
+{
+	run_filter_test('h_filter', '-lh', $filter);
+}
 
 
 $icli = "bin/icli -f t/in/status.dat.weird.1 -c t/in/objects.cache";

@@ -1,0 +1,7 @@
+
+aneurysm
+	Load                 [37;41mCRITICAL[0m OK - load average: 0.17, 0.13, 0.09
+	Processes            [37;44m UNKNOWN[0m PROCS OK: 118 processes
+
+steel.derf0.net
+	Users                [30;43m WARNING[0m USERS OK - 0 users currently logged in
