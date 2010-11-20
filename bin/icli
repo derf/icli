@@ -463,16 +463,16 @@ sub display_host_services {
 		elsif ($h->{'current_state'} == 2) {
 			print colored('UNREACHABLE', 'white on_blue');
 		}
-	}
 
-	print "\n";
+		print "\n";
+	}
 
 	foreach my $service (@services) {
 
 		if ($all and $verbosity < 3) {
 			print "\t";
 		}
-		else {
+		elsif ($all) {
 			print "\n";
 		}
 
