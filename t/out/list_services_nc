@@ -1,8 +1,8 @@
 
-alpha
+alpha [37;41mDOWN[0m
 	HTTP                    OK    HTTP OK: HTTP/1.0 200 OK - 2333 bytes in 0.019 second response time
 
-aneurysm
+aneurysm [37;44mUNREACHABLE[0m
 	Disk: /                 OK    DISK OK - free space: / 4846 MB (75% inode=90%):
 	Disk: /boot             OK    DISK OK - free space: /boot 119 MB (53% inode=99%):
 	Disk: /data             OK    DISK OK - free space: /data 60091 MB (48% inode=99%):

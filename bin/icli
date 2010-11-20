@@ -374,11 +374,25 @@ sub display_service {
 sub display_host_services {
 	my ($host, $all) = @_;
 	my @services;
+	my $h = $data->{'hosts'}->{$host};
 
 	@services = grep { filter_service($_) } @{$data->{'services'}->{$host}};
 
 	if ($all and @services) {
-		say "\n$host";
+
+		print "\n$host";
+
+		if ($h->{'current_state'}) {
+			print q{ };
+		}
+		if ($h->{'current_state'} == 1) {
+			print colored('DOWN', 'white on_red');
+		}
+		elsif ($h->{'current_state'} == 2) {
+			print colored('UNREACHABLE', 'white on_blue');
+		}
+
+		print "\n";
 	}
 
 	foreach my $service (@services) {
