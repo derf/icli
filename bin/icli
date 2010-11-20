@@ -73,6 +73,20 @@ sub pretty_date {
 	return time2str('%Y-%m-%d %H:%M:%S', $unix);
 }
 
+sub pretty_duration {
+	my ($since) = @_;
+	my $now = time();
+	my $dif = $now - $since;
+
+	return sprintf(
+		"%dd %dh %dm %ds",
+		int($dif / (24 * 3600)),
+		int(($dif / 3600) % 24),
+		int(($dif / 60) % 60),
+		$dif % 60,
+	);
+}
+
 sub check_is_soft {
 	my ($x) = @_;
 
@@ -337,38 +351,96 @@ sub display_service {
 
 	my $v = $verbosity;
 	my $flags = q{};
+	my $format = "%-16s : %s\n";
 
-	printf("%-20.20s", $s->{service_description});
+	if ($v < 3) {
 
-	if ($v >= 2) {
-		if ($s->{'problem_has_been_acknowledged'}) {
-			$flags .= 'A';
-		}
-		if ($s->{'is_flapping'}) {
-			$flags .= 'F';
-		}
-		if ($s->{'notifications_enabled'} == 0) {
-			$flags .= 'N';
-		}
-		if ($s->{'active_checks_enabled'} == 0 and
-				$s->{'passive_checks_enabled'} == 1) {
-			$flags .= 'P';
-		}
-		if (not ($s->{'active_checks_enabled'} or
-				$s->{'passive_checks_enabled'})) {
-			$flags .= '!';
+		printf("%-20.20s", $s->{service_description});
+
+		if ($v >= 2) {
+			if ($s->{'problem_has_been_acknowledged'}) {
+				$flags .= 'A';
+			}
+			if ($s->{'is_flapping'}) {
+				$flags .= 'F';
+			}
+			if ($s->{'notifications_enabled'} == 0) {
+				$flags .= 'N';
+			}
+			if ($s->{'active_checks_enabled'} == 0 and
+					$s->{'passive_checks_enabled'} == 1) {
+				$flags .= 'P';
+			}
+			if (not ($s->{'active_checks_enabled'} or
+					$s->{'passive_checks_enabled'})) {
+				$flags .= '!';
+			}
+
+			printf(" %s%-3s%s", color('bold'), $flags, color('reset'));
 		}
 
-		printf(" %s%-3s%s", color('bold'), $flags, color('reset'));
+		printf(" %s"     , service_state($s->{'has_been_checked'}, $s->{'current_state'}));
+
+		if ($v >= 2) {
+			printf(' %d/%d', $s->{'current_attempt'}, $s->{'max_attempts'});
+		}
+
+		printf(" %s\n", $s->{'plugin_output'});
+
 	}
-
-	printf(" %s"     , service_state($s->{'has_been_checked'}, $s->{'current_state'}));
-
-	if ($v >= 2) {
-		printf(' %d/%d', $s->{'current_attempt'}, $s->{'max_attempts'});
+	else {
+		printf(
+			$format,
+			'Host',
+			$s->{'host_name'},
+		);
+		printf(
+			$format,
+			'Service',
+			$s->{'service_description'},
+		);
+		printf(
+			"%-16s : %s (for %s)\n",
+			'Status',
+			service_state($s->{'has_been_checked'}, $s->{'current_state'}),
+			pretty_duration($s->{'last_state_change'}),
+		);
+		printf(
+			$format,
+			'Plugin Output',
+			$s->{'plugin_output'},
+		);
+		printf(
+			$format,
+			'Performance Data',
+			$s->{'performance_data'},
+		);
+		printf(
+			"%-16s : %d/%d\n",
+			'Current Attempt',
+			$s->{'current_attempt'},
+			$s->{'max_attempts'},
+		);
+		printf(
+			$format,
+			'Last Check Time',
+			pretty_date($s->{'last_check'}),
+		);
+		printf(
+			$format,
+			'Next Check',
+			pretty_date($s->{'next_check'}),
+		);
+		printf(
+			"%-16s : %s (%.1f%% state change)\n",
+			'Flapping',
+			($s->{'is_flapping'} ?
+				colored('YES', 'white on_red') :
+				colored('NO', 'black on_green')
+			),
+			$s->{'percent_state_change'},
+		);
 	}
-
-	printf(" %s\n", $s->{'plugin_output'});
 }
 
 sub display_host_services {
@@ -378,7 +450,7 @@ sub display_host_services {
 
 	@services = grep { filter_service($_) } @{$data->{'services'}->{$host}};
 
-	if ($all and @services) {
+	if ($all and @services and $verbosity < 3) {
 
 		print "\n$host";
 
@@ -391,14 +463,17 @@ sub display_host_services {
 		elsif ($h->{'current_state'} == 2) {
 			print colored('UNREACHABLE', 'white on_blue');
 		}
-
-		print "\n";
 	}
+
+	print "\n";
 
 	foreach my $service (@services) {
 
-		if ($all) {
+		if ($all and $verbosity < 3) {
 			print "\t";
+		}
+		else {
+			print "\n";
 		}
 
 		display_service($service);
