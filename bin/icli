@@ -400,10 +400,11 @@ sub display_service {
 			$s->{'service_description'},
 		);
 		printf(
-			"%-16s : %s (for %s)\n",
+			"%-16s : %s (for %s)%s\n",
 			'Status',
 			service_state($s->{'has_been_checked'}, $s->{'current_state'}),
 			pretty_duration($s->{'last_state_change'}),
+			($s->{'problem_has_been_acknowledged'} ? ' (Acknowledged)' : q{}),
 		);
 		printf(
 			$format,
