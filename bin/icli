@@ -19,7 +19,6 @@ my $status_file = '/var/lib/icinga/status.dat';
 my $rw_file     = '/var/lib/icinga/rw/icinga.cmd';
 my $context;
 my $colours = 1;
-my $short = 0;
 my $list_type = 's';
 my $verbosity = 1;
 my $recheck = 0;
@@ -105,10 +104,6 @@ sub check_is_host_down {
 sub filter_generic {
 	my ($x) = @_;
 	my $filters_unfulfilled = @filters;
-
-	if ($short and not $x->{'current_state'}) {
-		return 0;
-	}
 
 	foreach my $f (@filters) {
 		if (
@@ -604,7 +599,6 @@ GetOptions(
 	's|service=s'     => sub { push(@for_services, split(/,/, $_[1])) },
 	'v|verbose+'      => \$verbosity,
 	'V|version'       => sub { say "icli version $VERSION"; exit 0 },
-	'x|critical-only' => \$short,
 	'z|filter=s'      => sub { push(@filters, split(/,/, $_[1])) },
 )
 	or die("Please see perldoc -F $0 for help\n");
@@ -748,10 +742,6 @@ Schedule an immediate recheck of all selected services
 Limit selection to I<services> (comma separated lists).  Can be combined with
 B<-h>/B<-g> to further narrow down the selection, but may also be used
 stand-alone.
-
-=item B<-x>|B<--short>
-
-Only show services which are not OK
 
 =item B<-v>|B<--verbose>
 
