@@ -1,3 +1,9 @@
+icli 0.3 - Sun Nov 21 2010
+
+    * Show service flags with -v -ls (acknowledged, flapping etc.)
+    * Filter hosts/services by check state or various flags
+    * icli -vv lists hosts/services in an even more detailed manner
+
 icli 0.2 - Mon Nov 08 2010
 
     * List downtimes and check queue
