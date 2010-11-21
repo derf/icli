@@ -41,7 +41,7 @@ $cmd->exit_is_num(0);
 $cmd->stdout_is_file('t/out/hosts_group_local');
 $cmd->stderr_is_eq($EMPTY);
 
-$cmd = Test::Command->new(cmd => "$icli -lh -x");
+$cmd = Test::Command->new(cmd => "$icli -lh -z!o");
 $cmd->exit_is_num(0);
 $cmd->stdout_is_file('t/out/hosts_short');
 $cmd->stderr_is_eq($EMPTY);
@@ -81,7 +81,7 @@ $cmd->exit_is_num(0);
 $cmd->stdout_is_file('t/out/hosts_group_reduce');
 $cmd->stderr_is_eq($EMPTY);
 
-$cmd = Test::Command->new(cmd => "$icli -ls -x");
+$cmd = Test::Command->new(cmd => "$icli -ls -z!o");
 $cmd->exit_is_num(0);
 $cmd->stdout_is_file('t/out/services_short');
 $cmd->stderr_is_eq($EMPTY);
