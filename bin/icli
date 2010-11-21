@@ -684,9 +684,9 @@ B<icli> - Icinga Command Line Interface
 
 =head1 SYNOPSIS
 
-B<icli> [B<-x>] [B<-h> I<hosts>] [B<-g> I<hostgroups>] [B<-s> I<services>]
-[B<-c> I<config>] [B<-C>] [B<-f> I<status-file>]
-[B<-r>|B<-lh>|B<-ls>|B<-lq>|B<-ld>]
+B<icli> [B<-v>|B<-vv>] [B<-z> I<filter>] [B<-h> I<hosts>] [B<-g> I<hostgroups>]
+[B<-s> I<services>] [B<-c> I<config>] [B<-C>] [B<-f> I<status-file>]
+[B<-F> I<rw-file>] [B<-r>|B<-lh>|B<-ls>|B<-lq>|B<-ld>]
 
 =head1 DESCRIPTION
 
