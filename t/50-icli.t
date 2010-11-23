@@ -6,7 +6,7 @@ use 5.010;
 # We need commas in our qw list, they're not accidental
 no warnings 'qw';
 
-use Test::Command tests => (36*3);
+use Test::Command tests => (38*3);
 
 my $icli = 'bin/icli -f t/in/status.dat -c t/in/objects.cache';
 
@@ -89,6 +89,16 @@ $cmd->stderr_is_eq($EMPTY);
 $cmd = Test::Command->new(cmd => "$icli -ls -h steel.derf0.net");
 $cmd->exit_is_num(0);
 $cmd->stdout_is_file('t/out/list_services_single');
+$cmd->stderr_is_eq($EMPTY);
+
+$cmd = Test::Command->new(cmd => "$icli -lh -v");
+$cmd->exit_is_num(0);
+$cmd->stdout_is_file('t/out/list_hosts_v');
+$cmd->stderr_is_eq($EMPTY);
+
+$cmd = Test::Command->new(cmd => "$icli -ls -v");
+$cmd->exit_is_num(0);
+$cmd->stdout_is_file('t/out/list_services_v');
 $cmd->stderr_is_eq($EMPTY);
 
 $cmd = Test::Command->new(cmd => "$icli -lq");
