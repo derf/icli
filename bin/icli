@@ -69,6 +69,11 @@ sub with_colour {
 
 sub pretty_date {
 	my ($unix) = @_;
+
+	if ($unix == 0) {
+		return 'never';
+	}
+
 	return time2str('%Y-%m-%d %H:%M:%S', $unix);
 }
 
