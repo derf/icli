@@ -91,6 +91,22 @@ sub pretty_duration {
 	);
 }
 
+sub pretty_noyes {
+	my ($bool) = @_;
+	return ($bool ?
+		colored('YES', 'white on_red') :
+		colored('NO', 'black on_green')
+	);
+}
+
+sub pretty_yesno {
+	my ($bool) = @_;
+	return ($bool ?
+		colored('YES', 'black on_green') :
+		colored('NO', 'white on_red')
+	);
+}
+
 sub check_is_soft {
 	my ($x) = @_;
 
@@ -385,7 +401,7 @@ sub display_service {
 			printf(' %d/%d', $s->{'current_attempt'}, $s->{'max_attempts'});
 		}
 
-		printf(" %s\n", $s->{'plugin_output'});
+		printf(" %s", $s->{'plugin_output'});
 
 	}
 	else {
@@ -435,13 +451,69 @@ sub display_service {
 		printf(
 			"%-16s : %s (%.1f%% state change)\n",
 			'Flapping',
-			($s->{'is_flapping'} ?
-				colored('YES', 'white on_red') :
-				colored('NO', 'black on_green')
-			),
+			pretty_noyes($s->{'is_flapping'}),
 			$s->{'percent_state_change'},
 		);
 	}
+	if ($v > 3) {
+		printf(
+			$format,
+			'Check Type',
+			($s->{'check_type'} ? 'PASSIVE' : 'ACTIVE'),
+		);
+		printf(
+			"%-16s : %5.3fs\n%-16s : %5.3fs\n",
+			'Check Latency',
+			$s->{'check_latency'},
+			'Check Duration',
+			$s->{'check_execution_time'},
+		);
+		printf(
+			"%-16s : o %s   w %s   c %s   u %s\n",
+			'Last State Times',
+			pretty_date($s->{'last_time_ok'}),
+			pretty_date($s->{'last_time_warning'}),
+			pretty_date($s->{'last_time_critical'}),
+			pretty_date($s->{'last_time_unknown'}),
+		);
+		printf(
+			$format,
+			'In Downtime',
+			'FIXME'
+		);
+		printf(
+			$format,
+			'Active Checks',
+			pretty_yesno($s->{'active_checks_enabled'}),
+		);
+		printf(
+			$format,
+			'Passive Checks',
+			pretty_yesno($s->{'passive_checks_enabled'}),
+		);
+		printf(
+			$format,
+			'Obsessing',
+			pretty_yesno($s->{'obsess_over_service'}),
+		);
+		printf(
+			$format,
+			'Notifications',
+			pretty_yesno($s->{'notifications_enabled'}),
+		);
+		printf(
+			$format,
+			'Event Handler',
+			pretty_yesno($s->{'event_handler_enabled'}),
+		);
+		printf(
+			$format,
+			'Flap Detection',
+			pretty_yesno($s->{'flap_detection_enabled'}),
+		);
+	}
+	print "\n";
+
 }
 
 sub display_host_services {
