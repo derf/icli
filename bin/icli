@@ -568,7 +568,7 @@ sub display_host_single {
 			printf(" %d/%d", $h->{'current_attempt'}, $h->{'max_attempts'});
 		}
 
-		printf(" %s\n", $h->{'plugin_output'});
+		printf(" %s", $h->{'plugin_output'});
 	}
 	else {
 		printf(
@@ -618,8 +618,64 @@ sub display_host_single {
 			),
 			$h->{'percent_state_change'},
 		);
-		print "\n";
 	}
+	if ($v > 3) {
+		printf(
+			$format,
+			'Check Type',
+			($h->{'check_type'} ? 'PASSIVE' : 'ACTIVE'),
+		);
+		printf(
+			"%-16s : %5.3fs\n%-16s : %5.3fs\n",
+			'Check Latency',
+			$h->{'check_latency'},
+			'Check Duration',
+			$h->{'check_execution_time'},
+		);
+		printf(
+			"%-16s : o %s   d %s   u %s\n",
+			'Last State Times',
+			pretty_date($h->{'last_time_up'}),
+			pretty_date($h->{'last_time_down'}),
+			pretty_date($h->{'last_time_unreachable'}),
+		);
+		printf(
+			$format,
+			'In Downtime',
+			'FIXME'
+		);
+		printf(
+			$format,
+			'Active Checks',
+			pretty_yesno($h->{'active_checks_enabled'}),
+		);
+		printf(
+			$format,
+			'Passive Checks',
+			pretty_yesno($h->{'passive_checks_enabled'}),
+		);
+		printf(
+			$format,
+			'Obsessing',
+			pretty_yesno($h->{'obsess_over_host'}),
+		);
+		printf(
+			$format,
+			'Notifications',
+			pretty_yesno($h->{'notifications_enabled'}),
+		);
+		printf(
+			$format,
+			'Event Handler',
+			pretty_yesno($h->{'event_handler_enabled'}),
+		);
+		printf(
+			$format,
+			'Flap Detection',
+			pretty_yesno($h->{'flap_detection_enabled'}),
+		);
+	}
+	print "\n";
 
 }
 
