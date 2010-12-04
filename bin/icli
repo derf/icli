@@ -22,6 +22,7 @@ my $colours = 1;
 my $list_type = 's';
 my $verbosity = 1;
 my $recheck = 0;
+my $acknowledge = undef;
 my (@for_hosts, @for_groups, @for_services, @list_hosts, @list_services);
 my @filters;
 
@@ -713,14 +714,44 @@ sub recheck_host_all {
 sub recheck_service {
 	my ($host, $service) = @_;
 
-	if (have_service($host, $service)) {
-		dispatch_command('SCHEDULE_SVC_CHECK', $host, $service,
-			time());
-		say "Scheduled check of '$service' on '$host'";
+	dispatch_command('SCHEDULE_SVC_CHECK', $host, $service,
+		time());
+	say "Scheduled check of '$service' on '$host'";
+}
+
+sub acknowledge_service {
+	my ($host, $service) = @_;
+
+	dispatch_command('ACKNOWLEDGE_SVC_PROBLEM', $host, $service, 2, 1, 1,
+		'cli', $acknowledge);
+	say "Acknowledged $host/$service: $acknowledge";
+}
+
+sub action_on_host {
+	my ($h) = @_;
+
+	if ($recheck) {
+		recheck_host_all($h);
+	}
+}
+
+sub action_on_service {
+	my ($h, $s) = @_;
+
+	if (not have_service($h, $s)) {
+		return;
+	}
+
+	if ($recheck) {
+		recheck_service($h, $s);
+	}
+	if ($acknowledge) {
+		acknowledge_service($h, $s);
 	}
 }
 
 GetOptions(
+	'a|acknowledge=s' => sub { $acknowledge = $_[1]; $list_type = q{} },
 	'c|config=s'      => \$config_file,
 	'C|no-colours'    => sub { $colours = 0 },
 	'f|status-file=s' => \$status_file,
@@ -785,22 +816,22 @@ elsif ($list_type eq 'd') {
 		display_downtime($downtime);
 	}
 }
-elsif ($recheck) {
+elsif ($recheck or $acknowledge) {
 
 	foreach my $host (@list_hosts) {
 		if (not @list_services and not @filters) {
-			recheck_host_all($host);
+			action_on_host($host);
 		}
 		elsif (not @list_services and @filters) {
 			foreach my $service (
 					grep { filter_service($_) }
 					@{$data->{'services'}->{$host}} ) {
-				recheck_service($host, $service->{'service_description'});
+				action_on_service($host, $service->{'service_description'});
 			}
 		}
 		else {
 			foreach my $service (@list_services) {
-				recheck_service($host, $service);
+				action_on_service($host, $service);
 			}
 		}
 	}
