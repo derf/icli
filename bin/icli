@@ -362,6 +362,146 @@ sub display_downtime {
 	print "\n";
 }
 
+sub display_x_verbose {
+	my ($x, $format) = @_;
+	my $v = $verbosity;
+
+	if ($v > 2) {
+		printf(
+			$format,
+			'Host',
+			$x->{'host_name'},
+		);
+		if ($x->{'service_description'}) {
+			printf(
+				$format,
+				'Service',
+				$x->{'service_description'},
+			);
+			printf(
+				"%-16s : %s (for %s)%s\n",
+				'Status',
+				service_state($x->{'has_been_checked'}, $x->{'current_state'}),
+				pretty_duration($x->{'last_state_change'}),
+				($x->{'problem_has_been_acknowledged'} ? ' (Acknowledged)' : q{}),
+			);
+		}
+		else {
+			printf(
+				"%-16s : %s (for %s)%s\n",
+				'Status',
+				host_state($x->{'has_been_checked'}, $x->{'current_state'}),
+				pretty_duration($x->{'last_state_change'}),
+				($x->{'problem_has_been_acknowledged'} ? ' (Acknowledged)' : q{}),
+			);
+		}
+
+		printf(
+			$format,
+			'Plugin Output',
+			$x->{'plugin_output'},
+		);
+		printf(
+			$format,
+			'Performance Data',
+			$x->{'performance_data'},
+		);
+		printf(
+			"%-16s : %d/%d\n",
+			'Current Attempt',
+			$x->{'current_attempt'},
+			$x->{'max_attempts'},
+		);
+		printf(
+			$format,
+			'Last Check Time',
+			pretty_date($x->{'last_check'}),
+		);
+		printf(
+			$format,
+			'Next Check',
+			pretty_date($x->{'next_check'}),
+		);
+		printf(
+			"%-16s : %s (%.1f%% state change)\n",
+			'Flapping',
+			pretty_noyes($x->{'is_flapping'}),
+			$x->{'percent_state_change'},
+		);
+	}
+	if ($v > 3) {
+		printf(
+			$format,
+			'Check Type',
+			($x->{'check_type'} ? 'PASSIVE' : 'ACTIVE'),
+		);
+		printf(
+			"%-16s : %5.3fs\n%-16s : %5.3fs\n",
+			'Check Latency',
+			$x->{'check_latency'},
+			'Check Duration',
+			$x->{'check_execution_time'},
+		);
+		if ($x->{'service_description'}) {
+			printf(
+				"%-16s : o %s   w %s   c %s   u %s\n",
+				'Last State Times',
+				pretty_date($x->{'last_time_ok'}),
+				pretty_date($x->{'last_time_warning'}),
+				pretty_date($x->{'last_time_critical'}),
+				pretty_date($x->{'last_time_unknown'}),
+			);
+		}
+		else {
+			printf(
+				"%-16s : o %s   d %s   u %s\n",
+				'Last State Times',
+				pretty_date($x->{'last_time_up'}),
+				pretty_date($x->{'last_time_down'}),
+				pretty_date($x->{'last_time_unreachable'}),
+			);
+		}
+		printf(
+			$format,
+			'In Downtime',
+			'FIXME'
+		);
+		printf(
+			$format,
+			'Active Checks',
+			pretty_yesno($x->{'active_checks_enabled'}),
+		);
+		printf(
+			$format,
+			'Passive Checks',
+			pretty_yesno($x->{'passive_checks_enabled'}),
+		);
+		printf(
+			$format,
+			'Obsessing',
+			pretty_yesno(
+				$x->{'service_description'} ?
+				$x->{'obsess_over_service'} :
+				$x->{'obsess_over_host'}
+			),
+		);
+		printf(
+			$format,
+			'Notifications',
+			pretty_yesno($x->{'notifications_enabled'}),
+		);
+		printf(
+			$format,
+			'Event Handler',
+			pretty_yesno($x->{'event_handler_enabled'}),
+		);
+		printf(
+			$format,
+			'Flap Detection',
+			pretty_yesno($x->{'flap_detection_enabled'}),
+		);
+	}
+}
 
 sub display_service {
 	my ($s) = @_;
@@ -406,112 +546,7 @@ sub display_service {
 
 	}
 	else {
-		printf(
-			$format,
-			'Host',
-			$s->{'host_name'},
-		);
-		printf(
-			$format,
-			'Service',
-			$s->{'service_description'},
-		);
-		printf(
-			"%-16s : %s (for %s)%s\n",
-			'Status',
-			service_state($s->{'has_been_checked'}, $s->{'current_state'}),
-			pretty_duration($s->{'last_state_change'}),
-			($s->{'problem_has_been_acknowledged'} ? ' (Acknowledged)' : q{}),
-		);
-		printf(
-			$format,
-			'Plugin Output',
-			$s->{'plugin_output'},
-		);
-		printf(
-			$format,
-			'Performance Data',
-			$s->{'performance_data'},
-		);
-		printf(
-			"%-16s : %d/%d\n",
-			'Current Attempt',
-			$s->{'current_attempt'},
-			$s->{'max_attempts'},
-		);
-		printf(
-			$format,
-			'Last Check Time',
-			pretty_date($s->{'last_check'}),
-		);
-		printf(
-			$format,
-			'Next Check',
-			pretty_date($s->{'next_check'}),
-		);
-		printf(
-			"%-16s : %s (%.1f%% state change)\n",
-			'Flapping',
-			pretty_noyes($s->{'is_flapping'}),
-			$s->{'percent_state_change'},
-		);
-	}
-	if ($v > 3) {
-		printf(
-			$format,
-			'Check Type',
-			($s->{'check_type'} ? 'PASSIVE' : 'ACTIVE'),
-		);
-		printf(
-			"%-16s : %5.3fs\n%-16s : %5.3fs\n",
-			'Check Latency',
-			$s->{'check_latency'},
-			'Check Duration',
-			$s->{'check_execution_time'},
-		);
-		printf(
-			"%-16s : o %s   w %s   c %s   u %s\n",
-			'Last State Times',
-			pretty_date($s->{'last_time_ok'}),
-			pretty_date($s->{'last_time_warning'}),
-			pretty_date($s->{'last_time_critical'}),
-			pretty_date($s->{'last_time_unknown'}),
-		);
-		printf(
-			$format,
-			'In Downtime',
-			'FIXME'
-		);
-		printf(
-			$format,
-			'Active Checks',
-			pretty_yesno($s->{'active_checks_enabled'}),
-		);
-		printf(
-			$format,
-			'Passive Checks',
-			pretty_yesno($s->{'passive_checks_enabled'}),
-		);
-		printf(
-			$format,
-			'Obsessing',
-			pretty_yesno($s->{'obsess_over_service'}),
-		);
-		printf(
-			$format,
-			'Notifications',
-			pretty_yesno($s->{'notifications_enabled'}),
-		);
-		printf(
-			$format,
-			'Event Handler',
-			pretty_yesno($s->{'event_handler_enabled'}),
-		);
-		printf(
-			$format,
-			'Flap Detection',
-			pretty_yesno($s->{'flap_detection_enabled'}),
-		);
+		display_x_verbose($s, $format);
 	}
 	print "\n";
 
@@ -572,109 +607,7 @@ sub display_host_single {
 		printf(" %s", $h->{'plugin_output'});
 	}
 	else {
-		printf(
-			$format,
-			'Host',
-			$h->{'host_name'},
-		);
-		printf(
-			"%-16s : %s (for %s)%s\n",
-			'Status',
-			host_state($h->{'has_been_checked'}, $h->{'current_state'}),
-			pretty_duration($h->{'last_state_change'}),
-			($h->{'problem_has_been_acknowledged'} ? ' (Acknowledged)' : q{}),
-		);
-		printf(
-			$format,
-			'Plugin Output',
-			$h->{'plugin_output'},
-		);
-		printf(
-			$format,
-			'Performance Data',
-			$h->{'performance_data'},
-		);
-		printf(
-			"%-16s : %d/%d\n",
-			'Current Attempt',
-			$h->{'current_attempt'},
-			$h->{'max_attempts'},
-		);
-		printf(
-			$format,
-			'Last Check Time',
-			pretty_date($h->{'last_check'}),
-		);
-		printf(
-			$format,
-			'Next Check',
-			pretty_date($h->{'next_check'}),
-		);
-		printf(
-			"%-16s : %s (%.1f%% state change)\n",
-			'Flapping',
-			($h->{'is_flapping'} ?
-				colored('YES', 'white on_red') :
-				colored('NO', 'black on_green')
-			),
-			$h->{'percent_state_change'},
-		);
-	}
-	if ($v > 3) {
-		printf(
-			$format,
-			'Check Type',
-			($h->{'check_type'} ? 'PASSIVE' : 'ACTIVE'),
-		);
-		printf(
-			"%-16s : %5.3fs\n%-16s : %5.3fs\n",
-			'Check Latency',
-			$h->{'check_latency'},
-			'Check Duration',
-			$h->{'check_execution_time'},
-		);
-		printf(
-			"%-16s : o %s   d %s   u %s\n",
-			'Last State Times',
-			pretty_date($h->{'last_time_up'}),
-			pretty_date($h->{'last_time_down'}),
-			pretty_date($h->{'last_time_unreachable'}),
-		);
-		printf(
-			$format,
-			'In Downtime',
-			'FIXME'
-		);
-		printf(
-			$format,
-			'Active Checks',
-			pretty_yesno($h->{'active_checks_enabled'}),
-		);
-		printf(
-			$format,
-			'Passive Checks',
-			pretty_yesno($h->{'passive_checks_enabled'}),
-		);
-		printf(
-			$format,
-			'Obsessing',
-			pretty_yesno($h->{'obsess_over_host'}),
-		);
-		printf(
-			$format,
-			'Notifications',
-			pretty_yesno($h->{'notifications_enabled'}),
-		);
-		printf(
-			$format,
-			'Event Handler',
-			pretty_yesno($h->{'event_handler_enabled'}),
-		);
-		printf(
-			$format,
-			'Flap Detection',
-			pretty_yesno($h->{'flap_detection_enabled'}),
-		);
+		display_x_verbose($h, $format);
 	}
 	print "\n";
 
