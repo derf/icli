@@ -842,7 +842,7 @@ stand-alone.
 
 =item B<-v>|B<--verbose>
 
-Increase output verbosity
+Increase output verbosity.  Can be combined up to B<-vvv>
 
 =item B<-V>|B<--version>
 
