@@ -793,6 +793,10 @@ services and their states.
 Note that when supplying custom config and status file paths, B<icli> also
 works with B<Nagios>.  100% compatibility is not guranteed, however.
 
+B<icli> only works when executed on the host running the B<Icinga> daemon.  To
+use it on another host, shell aliases (like C<< alias icli='ssh $icingahost
+icli' >>) or similar are recommended.
+
 =head1 OPTIONS
 
 =over
