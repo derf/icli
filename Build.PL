@@ -20,6 +20,7 @@ my $build = Module::Build->new(
 		'Date::Format' => 0,
 		'Getopt::Long' => 0,
 		'Term::ANSIColor' => 0,
+		'Term::Size' => 0,
 	},
 	script_files => 'bin/',
 );

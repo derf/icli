@@ -10,6 +10,7 @@ use 5.010;
 use Date::Format;
 use Getopt::Long qw/:config bundling/;
 use Term::ANSIColor;
+use Term::Size;
 
 my $VERSION = '0.3';
 
@@ -23,6 +24,8 @@ my $list_type = 's';
 my $verbosity = 1;
 my $recheck = 0;
 my $acknowledge = undef;
+my $term_width = Term::Size::chars();
+my $cut_mode = 'c';
 my (@for_hosts, @for_groups, @for_services, @list_hosts, @list_services);
 my @filters;
 
@@ -106,6 +109,49 @@ sub pretty_yesno {
 		colored('YES', 'black on_green') :
 		colored('NO', 'white on_red')
 	);
+}
+
+sub split_by_words {
+	my ($str, $padding, $max_w) = @_;
+	my @words = split(/ /, $str);
+	my @ret;
+
+	foreach my $word (@words) {
+		if (length($word) > $max_w) {
+			# FIXME we can do better
+			$word = substr($word, 0, $max_w);
+		}
+	}
+
+	while (@words) {
+		my $cur_str = q{};
+		while (@words and ((length($cur_str) + length($words[0])) < $max_w)) {
+			if (length($cur_str)) {
+				$cur_str .= ' ';
+			}
+			$cur_str .= shift(@words);
+		}
+		if (@ret) {
+			$cur_str = (' ' x $padding) . $cur_str;
+		}
+		push(@ret, $cur_str);
+	}
+	return @ret;
+}
+
+sub break_str {
+	my ($text, $waste) = @_;
+	my $cut = $term_width - $waste;
+
+	if ($cut_mode eq 'c') {
+		return(substr($text, 0, $cut));
+	}
+	elsif ($cut_mode eq 'b') {
+		return(join("\n", split_by_words($text, $waste, $cut)));
+	}
+	else {
+		return($text);
+	}
 }
 
 sub check_is_soft {
@@ -399,7 +445,7 @@ sub display_x_verbose {
 		printf(
 			$format,
 			'Plugin Output',
-			$x->{'plugin_output'},
+			break_str($x->{'plugin_output'}, 19),
 		);
 		printf(
 			$format,
@@ -504,17 +550,25 @@ sub display_x_verbose {
 }
 
 sub display_service {
-	my ($s) = @_;
+	my ($s, $tab) = @_;
 
 	my $v = $verbosity;
 	my $flags = q{};
 	my $format = "%-16s : %s\n";
+	my $n_width;
 
 	if ($v < 3) {
+
+		$n_width = 20 + 8 + 2;
+		if ($tab) {
+			$n_width += 8;
+		}
 
 		printf("%-20.20s", $s->{service_description});
 
 		if ($v >= 2) {
+			$n_width += 5;
+
 			if ($s->{'problem_has_been_acknowledged'}) {
 				$flags .= 'A';
 			}
@@ -540,9 +594,12 @@ sub display_service {
 
 		if ($v >= 2) {
 			printf(' %d/%d', $s->{'current_attempt'}, $s->{'max_attempts'});
+			$n_width += 4;
 		}
 
-		printf(" %s", $s->{'plugin_output'});
+		print ' ';
+
+		print break_str($s->{'plugin_output'}, $n_width);
 
 	}
 	else {
@@ -585,7 +642,7 @@ sub display_host_services {
 			print "\n";
 		}
 
-		display_service($service);
+		display_service($service, $all);
 	}
 }
 
@@ -696,6 +753,7 @@ GetOptions(
 	's|service=s'     => sub { push(@for_services, split(/,/, $_[1])) },
 	'v|verbose+'      => \$verbosity,
 	'V|version'       => sub { say "icli version $VERSION"; exit 0 },
+	'x|cut-mode=s'    => sub { $cut_mode = substr($_[1], 0, 1) },
 	'z|filter=s'      => sub { push(@filters, split(/,/, $_[1])) },
 )
 	or die("Please see perldoc -F $0 for help\n");
@@ -852,6 +910,11 @@ Increase output verbosity.  Can be combined up to B<-vvv>
 
 Show version information
 
+=item B<-x>|B<--cut-mode> I<mode>
+
+What to do with lines which are too long for the terminal: B<n>othing, B<c>ut
+off, line B<b>reak (with proper indentation).
+
 =item B<-z>|B<--filter> I<expression>
 
 Limit selection to hosts/services passing the filter.  I<expression> is a comma
@@ -989,6 +1052,8 @@ None.
 =item * autodie (included with perl >= 5.10.1)
 
 =item * Date::Format
+
+=item * Term::Size
 
 =back
 

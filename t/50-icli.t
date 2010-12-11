@@ -8,7 +8,7 @@ no warnings 'qw';
 
 use Test::Command tests => (38*3);
 
-my $icli = 'bin/icli -f t/in/status.dat -c t/in/objects.cache';
+my $icli = 'bin/icli -f t/in/status.dat -c t/in/objects.cache -xn';
 
 my $EMPTY = q{};
 
