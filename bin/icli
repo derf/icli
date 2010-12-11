@@ -984,7 +984,13 @@ None.
 
 =head1 DEPENDENCIES
 
-None, so far.
+=over
+
+=item * autodie (included with perl >= 5.10.1)
+
+=item * Date::Format
+
+=back
 
 =head1 BUGS AND LIMITATIONS
 
