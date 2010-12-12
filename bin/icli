@@ -25,7 +25,7 @@ my $verbosity = 1;
 my $recheck = 0;
 my $acknowledge = undef;
 my $term_width = Term::Size::chars();
-my $cut_mode = 'c';
+my $cut_mode = 'b';
 my (@for_hosts, @for_groups, @for_services, @list_hosts, @list_services);
 my @filters;
 
@@ -920,13 +920,13 @@ Show version information
 =item B<-x>|B<--cut-mode> I<mode>
 
 What to do with lines which are too long for the terminal: B<n>othing, B<c>ut
-off, line B<b>reak (with proper indentation).
+off, line B<b>reak (with proper indentation).  The default is line B<b>reaks
 
 =item B<-z>|B<--filter> I<expression>
 
 Limit selection to hosts/services passing the filter.  I<expression> is a comma
 separated list of filters, only hosts/services to which all filters apply are
-selected.  See also L</"FILTER EXPRESSIONS">.
+selected.  See also L</"FILTER EXPRESSIONS">
 
 =back
 
