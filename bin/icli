@@ -116,18 +116,27 @@ sub split_by_words {
 	my @words = split(/ /, $str);
 	my @ret;
 
-	foreach my $word (@words) {
-		if (length($word) > $max_w) {
-			# FIXME we can do better
-			$word = substr($word, 0, $max_w);
+
+	while (grep { length($_) > $max_w } @words) {
+		for my $i ( 0 .. $#words ) {
+			my $word = $words[$i];
+
+			if (length($word) > $max_w) {
+				splice(@words, $i, 1, substr($word, 0, $max_w), substr($word, $max_w));
+				last;
+			}
 		}
 	}
 
 	while (@words) {
 		my $cur_str = q{};
-		while (@words and ((length($cur_str) + length($words[0])) < $max_w)) {
-			if (length($cur_str)) {
+		my $tr_space = 0;
+		while (@words and ((length($cur_str) + length($words[0]) + $tr_space) <= $max_w)) {
+			if ($tr_space) {
 				$cur_str .= ' ';
+			}
+			else {
+				$tr_space = 1;
 			}
 			$cur_str .= shift(@words);
 		}
