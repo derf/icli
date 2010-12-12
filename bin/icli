@@ -143,14 +143,21 @@ sub break_str {
 	my ($text, $waste) = @_;
 	my $cut = $term_width - $waste;
 
+	if (
+			(not defined $term_width) or 
+			($term_width == 0) or
+			($cut < 12)) {
+		return $text;
+	}
+
 	if ($cut_mode eq 'c') {
-		return(substr($text, 0, $cut));
+		return substr($text, 0, $cut);
 	}
 	elsif ($cut_mode eq 'b') {
-		return(join("\n", split_by_words($text, $waste, $cut)));
+		return join("\n", split_by_words($text, $waste, $cut));
 	}
 	else {
-		return($text);
+		return $text;
 	}
 }
 
