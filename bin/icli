@@ -463,6 +463,13 @@ sub display_x_verbose {
 			'Plugin Output',
 			break_str($x->{'plugin_output'}, 19),
 		);
+		if (length($x->{'long_plugin_output'})) {
+			printf(
+				$format,
+				q{},
+				break_str($x->{'long_plugin_output'}, 19),
+			);
+		}
 		printf(
 			$format,
 			'Performance Data',
