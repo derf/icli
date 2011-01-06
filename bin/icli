@@ -463,11 +463,11 @@ sub display_x_verbose {
 			'Plugin Output',
 			break_str($x->{'plugin_output'}, 19),
 		);
-		if (length($x->{'long_plugin_output'})) {
+		for my $line (split(qr{\\n}, $x->{'long_plugin_output'})) {
 			printf(
 				$format,
 				q{},
-				break_str($x->{'long_plugin_output'}, 19),
+				break_str($line, 19),
 			);
 		}
 		printf(
