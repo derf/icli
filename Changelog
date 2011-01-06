@@ -1,3 +1,10 @@
+git HEAD
+
+    * icli -vvv lists hosts/services with maximum verbosity
+    * Acknowledging of host/service problems
+    * Cut off or break long lines (improves output readability)
+    * Print long plugin output in -vv/-vvv (if available)
+
 icli 0.3 - Sun Nov 21 2010
 
     * Show service flags with -v -ls (acknowledged, flapping etc.)
