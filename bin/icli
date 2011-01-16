@@ -98,16 +98,16 @@ sub pretty_duration {
 sub pretty_noyes {
 	my ($bool) = @_;
 	return ($bool ?
-		colored('YES', 'white on_red') :
-		colored('NO', 'black on_green')
+		with_colour('YES', 'white on_red') :
+		with_colour('NO', 'black on_green')
 	);
 }
 
 sub pretty_yesno {
 	my ($bool) = @_;
 	return ($bool ?
-		colored('YES', 'black on_green') :
-		colored('NO', 'white on_red')
+		with_colour('YES', 'black on_green') :
+		with_colour('NO', 'white on_red')
 	);
 }
 
@@ -610,7 +610,8 @@ sub display_service {
 				$flags .= '!';
 			}
 
-			printf(" %s%-3s%s", color('bold'), $flags, color('reset'));
+			$flags = sprintf(" %-3s", $flags);
+			print with_colour($flags, 'bold');
 		}
 
 		printf(" %s"     , service_state($s->{'has_been_checked'}, $s->{'current_state'}));
@@ -647,10 +648,10 @@ sub display_host_services {
 			print q{ };
 		}
 		if ($h->{'current_state'} == 1) {
-			print colored('DOWN', 'white on_red');
+			print with_colour('DOWN', 'white on_red');
 		}
 		elsif ($h->{'current_state'} == 2) {
-			print colored('UNREACHABLE', 'white on_blue');
+			print with_colour('UNREACHABLE', 'white on_blue');
 		}
 
 		print "\n";
