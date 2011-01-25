@@ -1,35 +1,35 @@
 
 alpha [37;41mDOWN[0m
-	HTTP                 [1m   [0m [30;42m   OK   [0m 1/4 HTTP OK: HTTP/1.0 200 OK - 2333 bytes in 0.019 second response time
+	HTTP                [1m    [0m [30;42m   OK   [0m 1/4 HTTP OK: HTTP/1.0 200 OK - 2333 bytes in 0.019 second response time
 
 aneurysm [37;44mUNREACHABLE[0m
-	Disk: /              [1m   [0m [30;42m   OK   [0m 1/4 DISK OK - free space: / 4846 MB (75% inode=90%):
-	Disk: /boot          [1m   [0m [30;42m   OK   [0m 1/4 DISK OK - free space: /boot 119 MB (53% inode=99%):
-	Disk: /data          [1m   [0m [30;42m   OK   [0m 1/4 DISK OK - free space: /data 60091 MB (48% inode=99%):
-	Disk: /home          [1m   [0m [30;42m   OK   [0m 1/4 DISK OK - free space: /home 58378 MB (59% inode=98%):
-	HTTP                 [1m   [0m [30;42m   OK   [0m 1/4 HTTP OK: HTTP/1.1 200 OK - 7467 bytes in 0.001 second response time
-	HTTPS                [1m   [0m [30;42m   OK   [0m 1/4 HTTP OK: HTTP/1.1 200 OK - 7467 bytes in 0.018 second response time
-	Load                 [1m   [0m [37;41mCRITICAL[0m 1/4 OK - load average: 0.17, 0.13, 0.09
-	Processes            [1m   [0m [37;44m UNKNOWN[0m 1/4 PROCS OK: 118 processes
-	SMTP                 [1m   [0m [30;42m   OK   [0m 1/4 SMTP OK - 0.038 sec. response time
-	SSH                  [1m   [0m [30;42m   OK   [0m 1/4 SSH OK - OpenSSH_5.5p1 Debian-4 (protocol 2.0)
-	SSH password login d [1m   [0m [30;42m   OK   [0m 1/4 Password login disabled (server accepts publickey)
-	System Backup        [1mP  [0m PENDING  1/1 /dev/mapper/misc-backup  109G   40G   69G  37% /backup
+	Disk: /             [1m    [0m [30;42m   OK   [0m 1/4 DISK OK - free space: / 4846 MB (75% inode=90%):
+	Disk: /boot         [1m    [0m [30;42m   OK   [0m 1/4 DISK OK - free space: /boot 119 MB (53% inode=99%):
+	Disk: /data         [1m    [0m [30;42m   OK   [0m 1/4 DISK OK - free space: /data 60091 MB (48% inode=99%):
+	Disk: /home         [1m    [0m [30;42m   OK   [0m 1/4 DISK OK - free space: /home 58378 MB (59% inode=98%):
+	HTTP                [1m    [0m [30;42m   OK   [0m 1/4 HTTP OK: HTTP/1.1 200 OK - 7467 bytes in 0.001 second response time
+	HTTPS               [1m    [0m [30;42m   OK   [0m 1/4 HTTP OK: HTTP/1.1 200 OK - 7467 bytes in 0.018 second response time
+	Load                [1m    [0m [37;41mCRITICAL[0m 1/4 OK - load average: 0.17, 0.13, 0.09
+	Processes           [1m    [0m [37;44m UNKNOWN[0m 1/4 PROCS OK: 118 processes
+	SMTP                [1m    [0m [30;42m   OK   [0m 1/4 SMTP OK - 0.038 sec. response time
+	SSH                 [1m    [0m [30;42m   OK   [0m 1/4 SSH OK - OpenSSH_5.5p1 Debian-4 (protocol 2.0)
+	SSH password login d[1m    [0m [30;42m   OK   [0m 1/4 Password login disabled (server accepts publickey)
+	System Backup       [1m P  [0m PENDING  1/1 /dev/mapper/misc-backup  109G   40G   69G  37% /backup
 
 steel-vpn
-	SMTP                 [1m   [0m [30;42m   OK   [0m 1/4 SMTP OK - 0.080 sec. response time
+	SMTP                [1m    [0m [30;42m   OK   [0m 1/4 SMTP OK - 0.080 sec. response time
 
 steel.derf0.net
-	Disk: lv-home        [1m   [0m [30;42m   OK   [0m 1/4 DISK OK - free space: /home 20207 MB (95% inode=99%):
-	Disk: lv-root        [1m   [0m [30;42m   OK   [0m 1/4 DISK OK - free space: / 5330 MB (85% inode=90%):
-	Disk: vda1           [1m   [0m [30;42m   OK   [0m 1/4 DISK OK - free space: /boot 190 MB (88% inode=99%):
-	HTTP                 [1m   [0m [30;42m   OK   [0m 1/4 HTTP OK: HTTP/1.1 200 OK - 668 bytes in 0.040 second response time
-	Load                 [1m   [0m [30;42m   OK   [0m 1/4 OK - load average: 0.00, 0.00, 0.00
-	Mail Queue           [1m   [0m [30;42m   OK   [0m 1/4 OK: mailq reports queue is empty
-	No open relay        [1m   [0m [30;42m   OK   [0m 1/4 NORELAY OK: <** 554 5.7.1 <derf@chaosdorf.de>: Relay access denied
-	Not Blacklisted      [1m   [0m [30;42m   OK   [0m 1/4 CHECK_RBL OK - steel.derf0.net BLACKLISTED on 0 servers of 43
-	Processes            [1m   [0m [30;42m   OK   [0m 1/4 PROCS OK: 82 processes
-	SMTP                 [1m   [0m [30;42m   OK   [0m 1/4 SMTP OK - 0.122 sec. response time
-	SSH                  [1m   [0m [30;42m   OK   [0m 1/4 SSH OK - OpenSSH_5.5p1 Debian-4 (protocol 2.0)
-	SSH password login d [1m   [0m [30;42m   OK   [0m 1/4 Password login disabled (server accepts publickey)
-	Users                [1m   [0m [30;43m WARNING[0m 1/4 USERS OK - 0 users currently logged in
+	Disk: lv-home       [1m    [0m [30;42m   OK   [0m 1/4 DISK OK - free space: /home 20207 MB (95% inode=99%):
+	Disk: lv-root       [1m    [0m [30;42m   OK   [0m 1/4 DISK OK - free space: / 5330 MB (85% inode=90%):
+	Disk: vda1          [1m    [0m [30;42m   OK   [0m 1/4 DISK OK - free space: /boot 190 MB (88% inode=99%):
+	HTTP                [1m    [0m [30;42m   OK   [0m 1/4 HTTP OK: HTTP/1.1 200 OK - 668 bytes in 0.040 second response time
+	Load                [1m    [0m [30;42m   OK   [0m 1/4 OK - load average: 0.00, 0.00, 0.00
+	Mail Queue          [1m    [0m [30;42m   OK   [0m 1/4 OK: mailq reports queue is empty
+	No open relay       [1m    [0m [30;42m   OK   [0m 1/4 NORELAY OK: <** 554 5.7.1 <derf@chaosdorf.de>: Relay access denied
+	Not Blacklisted     [1m    [0m [30;42m   OK   [0m 1/4 CHECK_RBL OK - steel.derf0.net BLACKLISTED on 0 servers of 43
+	Processes           [1m    [0m [30;42m   OK   [0m 1/4 PROCS OK: 82 processes
+	SMTP                [1m    [0m [30;42m   OK   [0m 1/4 SMTP OK - 0.122 sec. response time
+	SSH                 [1m    [0m [30;42m   OK   [0m 1/4 SSH OK - OpenSSH_5.5p1 Debian-4 (protocol 2.0)
+	SSH password login d[1m    [0m [30;42m   OK   [0m 1/4 Password login disabled (server accepts publickey)
+	Users               [1m    [0m [30;43m WARNING[0m 1/4 USERS OK - 0 users currently logged in
