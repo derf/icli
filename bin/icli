@@ -12,7 +12,7 @@ use Getopt::Long qw/:config bundling/;
 use Term::ANSIColor;
 use Term::Size;
 
-my $VERSION = '0.3';
+my $VERSION = '0.4';
 
 my ($cache, $config, $data, $extra);
 my $config_file = '/var/cache/icinga/objects.cache';

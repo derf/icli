@@ -1,8 +1,8 @@
-git HEAD
+icli 0.4 - Mon Jan 31 2011
 
     * icli -vvv lists hosts/services with maximum verbosity
     * Acknowledging of host/service problems
-    * Cut off or break long lines (improves output readability)
+    * Cut off or break long lines with -x (improves output readability)
     * Print long plugin output in -vv/-vvv (if available)
     * Fix -C (didn't remove all colours)
 
