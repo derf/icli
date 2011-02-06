@@ -277,7 +277,10 @@ sub read_objects_line {
 				push(@{${$ref}->{contacts}}, $cache);
 			}
 			when ('hostdowntime') {
-				push(@{${$ref}->{downtimes}}, $cache);
+				push(@{${$ref}->{hostdowntimes}}, $cache);
+			}
+			when ('servicedowntime') {
+				push(@{${$ref}->{servicedowntimes}}, $cache);
 			}
 			when ('hostgroup') {
 				${$ref}->{hostgroups}->{$cache->{hostgroup_name}} = $cache;
@@ -827,7 +830,7 @@ elsif ($list_type eq 'q') {
 	display_queue();
 }
 elsif ($list_type eq 'd') {
-	foreach my $downtime (@{$data->{downtimes}}) {
+	foreach my $downtime (@{$data->{hostdowntimes}}) {
 		display_downtime($downtime);
 	}
 }
