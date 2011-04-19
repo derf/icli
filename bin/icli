@@ -789,6 +789,17 @@ read_objects($status_file, \$data);
 read_objects($config_file, \$config);
 enhance_status();
 
+for my $arg (@ARGV) {
+	my ($host, $service) = split(qr{/}, $arg);
+
+	if (not grep { $host } @for_hosts) {
+		push(@for_hosts, $host);
+	}
+	if ($service) {
+		push(@for_services, $service);
+	}
+}
+
 foreach my $host (@for_hosts) {
 	if (not exists $data->{services}->{$host}) {
 		die("Unknown host: ${host}\n");
@@ -869,6 +880,7 @@ B<icli> - Icinga Command Line Interface
 B<icli> [B<-v>|B<-vv>] [B<-z> I<filter>] [B<-h> I<hosts>] [B<-g> I<hostgroups>]
 [B<-s> I<services>] [B<-c> I<config>] [B<-C>] [B<-f> I<status-file>]
 [B<-F> I<rw-file>] [B<-r>|B<-lh>|B<-ls>|B<-lq>|B<-ld>]
+[I<host>/I<service> I<...>]
 
 =head1 DESCRIPTION
 
@@ -881,6 +893,11 @@ works with B<Nagios>.  100% compatibility is not guranteed, however.
 B<icli> only works when executed on the host running the B<Icinga> daemon.  To
 use it on another host, shell aliases (like C<< alias icli='ssh $icingahost
 icli' >>) or similar are recommended.
+
+You can narrow down the list of services you want displayed either using
+B<filters> (like C<< icli -z!o >>), the B<-h>/B<-s> arguments (C<< icli -h
+aneurysm -s Libraries,Websites >>) or commandline args (C<< icli
+aneurysm/{Libraries,Websites} >> with shell expansion).
 
 =head1 OPTIONS
 
