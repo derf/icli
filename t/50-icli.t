@@ -6,7 +6,7 @@ use 5.010;
 # We need commas in our qw list, they're not accidental
 no warnings 'qw';
 
-use Test::Command tests => (38*3);
+use Test::Command tests => (36*3 + 4);
 
 my $icli = 'bin/icli -f t/in/status.dat -c t/in/objects.cache -xn';
 
@@ -103,12 +103,12 @@ $cmd->stderr_is_eq($EMPTY);
 
 $cmd = Test::Command->new(cmd => "$icli -lq");
 $cmd->exit_is_num(0);
-$cmd->stdout_is_file('t/out/list_queue');
+# no stdout test, fails with timezones != GMT+1
 $cmd->stderr_is_eq($EMPTY);
 
 $cmd = Test::Command->new(cmd => "$icli -lq -h aneurysm");
 $cmd->exit_is_num(0);
-$cmd->stdout_is_file('t/out/list_queue_aneurysm');
+# no stdout test, fails with timezones != GMT+1
 $cmd->stderr_is_eq($EMPTY);
 
 
