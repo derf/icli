@@ -23,6 +23,7 @@ my $colours = 1;
 my $list_type = 's';
 my $verbosity = 1;
 my $recheck = 0;
+my $force_recheck = 0;
 my $acknowledge = undef;
 my $term_width = Term::Size::chars();
 my $cut_mode = 'b';
@@ -736,6 +737,14 @@ sub recheck_service {
 	say "Scheduled check of '$service' on '$host'";
 }
 
+sub force_recheck_service {
+	my ($host, $service) = @_;
+
+	dispatch_command('SCHEDULE_FORCED_SVC_CHECK', $host, $service,
+		time());
+	say "Scheduled forced check of '$service' on '$host'";
+}
+
 sub acknowledge_service {
 	my ($host, $service) = @_;
 
@@ -762,6 +771,9 @@ sub action_on_service {
 	if ($recheck) {
 		recheck_service($h, $s);
 	}
+	if ($force_recheck) {
+		force_recheck_service($h, $s);
+	}
 	if ($acknowledge) {
 		acknowledge_service($h, $s);
 	}
@@ -778,6 +790,7 @@ GetOptions(
 	'l|list=s'        => sub { $list_type = substr($_[1], 0, 1) },
 	'r|recheck'       => sub { $recheck = 1; $list_type = q{} },
 	's|service=s'     => sub { push(@for_services, split(/,/, $_[1])) },
+	'u|force-recheck' => sub { $force_recheck = 1; $list_type = q{} },
 	'v|verbose+'      => \$verbosity,
 	'V|version'       => sub { say "icli version $VERSION"; exit 0 },
 	'x|cut-mode=s'    => sub { $cut_mode = substr($_[1], 0, 1) },
@@ -879,7 +892,7 @@ B<icli> - Icinga Command Line Interface
 
 B<icli> [B<-v>|B<-vv>] [B<-z> I<filter>] [B<-h> I<hosts>] [B<-g> I<hostgroups>]
 [B<-s> I<services>] [B<-c> I<config>] [B<-C>] [B<-f> I<status-file>]
-[B<-F> I<rw-file>] [B<-r>|B<-lh>|B<-ls>|B<-lq>|B<-ld>]
+[B<-F> I<rw-file>] [B<-r>|B<-u>|B<-lh>|B<-ls>|B<-lq>|B<-ld>]
 [I<host>/I<service> I<...>]
 
 =head1 DESCRIPTION
@@ -939,6 +952,10 @@ Note that only the first character of the argument is checked, so C<< icli
 =item B<-r>|B<--recheck>
 
 Schedule an immediate recheck of all selected services
+
+=item B<-u>|B<--force-recheck>
+
+Schedule a forced, immediate recheck of all selected services
 
 =item B<-s>|B<--service> I<services>
 
