@@ -4,7 +4,11 @@ use strict;
 use warnings;
 use Module::Build;
 
-my $build = Module::Build->new(
+my $build = Module::Build->subclass(
+	code => q(
+		sub ACTION_testauthor { shift->generic_tast(type => 'author') }
+	)
+)->new(
 	build_requires => {
 		'Test::More' => 0,
 		'Test::Compile' => 0,
@@ -24,5 +28,8 @@ my $build = Module::Build->new(
 		'Term::Size' => 0,
 	},
 	script_files => 'bin/',
+	test_types => {
+		author => '.at',
+	},
 );
 $build->create_build_script();
