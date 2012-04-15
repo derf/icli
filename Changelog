@@ -1,3 +1,8 @@
+icli 0.41 - Sun Apr 15 2012
+
+    * Add "icli host/service" as "icli -h host -s service" shortcut
+    * Add -u / --force-recheck option (Patch by Hugh Brown)
+
 icli 0.4 - Mon Jan 31 2011
 
     * icli -vvv lists hosts/services with maximum verbosity

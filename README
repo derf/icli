@@ -1,14 +1,13 @@
 icli - Icinga Command Line Interface
 
 Requires:
- * perl version 5.10 or newer
+ * perl version 5.10 or newer with Date::Format and Term::Size
  * A local icinga daemon + access to some of its files
 
 Installation:
 
  > perl Build.PL
  > ./Build
- > ./Build test
  > sudo ./Build install
 
 You can then run 'man icli' for more information.
