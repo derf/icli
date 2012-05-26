@@ -1,3 +1,9 @@
+git HEAD
+
+    * Add -U / --as-contact option to only operate on services visible to a
+      certain contact
+    * New dependency List::MoreUtils
+
 icli 0.41 - Sun Apr 15 2012
 
     * Add "icli host/service" as "icli -h host -s service" shortcut

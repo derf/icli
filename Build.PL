@@ -6,7 +6,7 @@ use Module::Build;
 
 my $build = Module::Build->subclass(
 	code => q(
-		sub ACTION_testauthor { shift->generic_tast(type => 'author') }
+		sub ACTION_testauthor { shift->generic_task(type => 'author') }
 	)
 )->new(
 	build_requires => {
@@ -24,6 +24,7 @@ my $build = Module::Build->subclass(
 		'Carp' => 0,
 		'Date::Format' => 0,
 		'Getopt::Long' => 0,
+		'List::MoreUtils' => 0,
 		'Term::ANSIColor' => 0,
 		'Term::Size' => 0,
 	},

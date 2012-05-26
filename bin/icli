@@ -10,6 +10,7 @@ use 5.010;
 use Carp qw(croak);
 use Date::Format;
 use Getopt::Long qw/:config bundling/;
+use List::MoreUtils qw(any firstval);
 use Term::ANSIColor;
 use Term::Size;
 
@@ -26,6 +27,7 @@ my $verbosity     = 1;
 my $recheck       = 0;
 my $force_recheck = 0;
 my $acknowledge   = undef;
+my $as_contact    = undef;
 my $term_width    = Term::Size::chars();
 my $cut_mode      = 'b';
 my ( @for_hosts, @for_groups, @for_services, @list_hosts, @list_services );
@@ -118,7 +120,7 @@ sub split_by_words {
 	my @words = split( / /, $str );
 	my @ret;
 
-	while ( grep { length($_) > $max_w } @words ) {
+	while ( any { length($_) > $max_w } @words ) {
 		for my $i ( 0 .. $#words ) {
 			my $word = $words[$i];
 
@@ -261,7 +263,20 @@ sub filter_service {
 		return 0;
 	}
 
+	if ($as_contact and not has_contact($s, $as_contact)) {
+		return 0;
+	}
+
 	return 1;
+}
+
+sub has_contact {
+	my ($s, $contact) = @_;
+
+	my $conf_s = firstval { $_->{service_description} eq $s->{service_description } }
+		@{ $config->{services}{$s->{host_name}}};
+
+	return any { $_ eq $contact } @{$conf_s->{contacts}};
 }
 
 sub read_objects_line {
@@ -270,7 +285,7 @@ sub read_objects_line {
 	if ( $line =~ / ^ (?:define \s )? (?<context> \w+) \s+ { /x ) {
 		$context = $+{context};
 	}
-	elsif ( $line =~ / ^ \t (?<key> [^=\t]+ ) [=\t] (?<value> .*) $ /x ) {
+	elsif ( $line =~ / ^ \t (?<key> [^=\t]+ ) [=\t] \s* (?<value> .*) $ /x ) {
 		$cache->{ $+{key} } = $+{value};
 	}
 	elsif ( $line =~ / ^ \t } $ /x ) {
@@ -311,6 +326,19 @@ sub read_objects_line {
 
 				# TODO
 			}
+			when ('host') {
+				${$ref}->{hosts}->{ $cache->{host_name} } = $cache;
+			}
+			when ('service') {
+				push(
+					@{ ${$ref}->{services}->{ $cache->{host_name} } },
+					$cache
+				);
+			}
+			when ('contactgroup') {
+				${$ref}->{contactgroups}->{ $cache->{contactgroup_name} }
+					= [split(m{, *}, $cache->{members})];
+			}
 			when (
 				[
 					qw[
@@ -348,6 +376,17 @@ sub enhance_status {
 			if ( $s->{current_state} != 0 ) {
 				$extra->{$h}->{service_problem} = 1;
 				next HOST;
+			}
+		}
+	}
+	HOST: for my $h ( keys %{ $config->{services} } ) {
+		for my $s ( @{ $config->{services}->{$h} } ) {
+			if ($s->{contacts}) {
+				$s->{contacts} =~ s{^ *}{}o;
+				$s->{contacts} = [split(m{, *}, $s->{contacts})];
+			}
+			for my $group (split(m{, *}, $s->{contact_groups})) {
+				push(@{$s->{contacts}}, @{$config->{contactgroups}{$group}});
 			}
 		}
 	}
@@ -773,6 +812,7 @@ GetOptions(
 	'r|recheck'       => sub { $recheck = 1; $list_type = q{} },
 	's|service=s' => sub { push( @for_services, split( /,/, $_[1] ) ) },
 	'u|force-recheck' => sub { $force_recheck = 1; $list_type = q{} },
+	'U|as-contact=s'  => \$as_contact,
 	'v|verbose+' => \$verbosity,
 	'V|version' => sub { say "icli version $VERSION"; exit 0 },
 	'x|cut-mode=s' => sub { $cut_mode = substr( $_[1], 0, 1 ) },
@@ -786,7 +826,7 @@ enhance_status();
 for my $arg (@ARGV) {
 	my ( $host, $service ) = split( qr{/}, $arg );
 
-	if ( not grep { $host } @for_hosts ) {
+	if ( not any { $host } @for_hosts ) {
 		push( @for_hosts, $host );
 	}
 	if ($service) {
@@ -810,7 +850,7 @@ foreach my $group (@for_groups) {
 	foreach
 	  my $host ( split /,/, $config->{'hostgroups'}->{$group}->{'members'} )
 	{
-		if ( not grep { $_ eq $host } @list_hosts ) {
+		if ( not any { $_ eq $host } @list_hosts ) {
 			push( @list_hosts, $host );
 		}
 	}
@@ -943,6 +983,14 @@ Schedule an immediate recheck of all selected services
 =item B<-u>|B<--force-recheck>
 
 Schedule a forced, immediate recheck of all selected services
+
+=item B<-U>|B<--as-contact> I<name>
+
+Only operate on service visible to I<name>. Doesn't work for B<-lh> yet,
+most useful for B<-ls>.
+
+NOTE: This is meant to help find out which services a user has access to. It is
+NOT intended as a way to restrict access and should never be used that way.
 
 =item B<-s>|B<--service> I<services>
 
