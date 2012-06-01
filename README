@@ -1,8 +1,11 @@
 icli - Icinga Command Line Interface
 
 Requires:
- * perl version 5.10 or newer with Date::Format and Term::Size
  * A local icinga daemon + access to some of its files
+ * perl v5.10 or newer with the following modules:
+ * Date::Format
+ * List::MoreUtils
+ * Term::Size
 
 Installation:
 

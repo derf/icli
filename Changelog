@@ -1,4 +1,4 @@
-git HEAD
+icli 0.42 - Fri Jun 01 2012
 
     * Add -U / --as-contact option to only operate on services visible to a
       certain contact
