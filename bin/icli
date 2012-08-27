@@ -943,6 +943,14 @@ aneurysm/{Libraries,Websites} >> with shell expansion).
 
 =over
 
+=item B<-a>|B<--acknowledge> I<comment>
+
+Acknowledge all matching services with string I<comment>. This creates a sticky
+acknwoledgment with notification and no expire time. The comment will not be
+persistent.
+
+Note: Acknowledgement of host problems is not yet supported.
+
 =item B<-c>|B<--config> I<config>
 
 Read config from I<file> instead of the default
