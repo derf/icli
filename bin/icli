@@ -26,6 +26,7 @@ my $list_type     = 's';
 my $verbosity     = 1;
 my $recheck       = 0;
 my $force_recheck = 0;
+my $match_output  = undef;
 my $acknowledge   = undef;
 my $as_contact    = undef;
 my $term_width    = Term::Size::chars();
@@ -197,6 +198,10 @@ sub check_is_host_down {
 sub filter_generic {
 	my ($x) = @_;
 	my $filters_unfulfilled = @filters;
+
+	if ($match_output and not $x->{plugin_output} =~ $match_output) {
+		return 0;
+	}
 
 	foreach my $f (@filters) {
 		if (
@@ -809,6 +814,7 @@ GetOptions(
 	'g|hostgroup=s'   => sub { push( @for_groups, split( /,/, $_[1] ) ) },
 	'h|host=s'        => sub { push( @for_hosts, split( /,/, $_[1] ) ) },
 	'l|list=s'        => sub { $list_type = substr( $_[1], 0, 1 ) },
+	'm|match=s'       => sub { $match_output = qr{$_[1]}i },
 	'r|recheck'       => sub { $recheck = 1; $list_type = q{} },
 	's|service=s' => sub { push( @for_services, split( /,/, $_[1] ) ) },
 	'u|force-recheck' => sub { $force_recheck = 1; $list_type = q{} },
@@ -983,6 +989,11 @@ Limit selection to I<hosts> (comma separated list)
 List either services (the default) or hosts.
 Note that only the first character of the argument is checked, so C<< icli
 -lh >>, C<< icli -ls >> etc. are also fine.
+
+=item B<-m>|B<--match> I<regex>
+
+Limit selection to hosts/services whose plugin output matches
+I<regex> (perl regular expression, case insensitive. see L<perlre>).
 
 =item B<-r>|B<--recheck>
 

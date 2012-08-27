@@ -1,6 +1,7 @@
 git hEAD
 
     * Add missing documentation for -a / --acknowledge
+    * Add -m / --match option to select on plugin output
 
 icli 0.42 - Fri Jun 01 2012
 
