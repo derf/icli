@@ -14,7 +14,7 @@ use List::MoreUtils qw(any firstval);
 use Term::ANSIColor;
 use Term::Size;
 
-our $VERSION = '0.42';
+our $VERSION = '0.43';
 
 my ( $cache, $config, $data, $extra );
 my $config_file = '/var/cache/icinga/objects.cache';
@@ -926,7 +926,7 @@ B<icli> [B<-v>|B<-vv>] [B<-z> I<filter>] [B<-h> I<hosts>] [B<-g> I<hostgroups>]
 
 =head1 VERSION
 
-version 0.42
+version 0.43
 
 =head1 DESCRIPTION
 
