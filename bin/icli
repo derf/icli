@@ -24,6 +24,7 @@ my $context;
 my $colours       = 1;
 my $list_type     = 's';
 my $verbosity     = 1;
+my $overview      = 1;
 my $recheck       = 0;
 my $force_recheck = 0;
 my $match_output  = undef;
@@ -114,6 +115,24 @@ sub pretty_yesno {
 		? with_colour( 'YES', 'black on_green' )
 		: with_colour( 'NO',  'white on_red' )
 	);
+}
+
+sub pretty_state {
+	my ($count, $state) = @_;
+	my $ret;
+	my $colour;
+
+	given ($state) {
+		when ('ok') { $colour = 'black on_green' }
+		when ('warning') { $colour = 'black on_yellow' }
+		when ('critical') { $colour = 'white on_red' }
+		when ('unknown') { $colour = 'white on_blue' }
+	}
+
+	if ($count == 0) {
+		return q{    };
+	}
+	return with_colour(sprintf('%4d', $count), $colour);
 }
 
 sub split_by_words {
@@ -742,6 +761,68 @@ sub display_host {
 	}
 }
 
+sub display_host_overview {
+	my ($host) = @_;
+	my ($ok, $warn, $crit, $unk) = (0) x 4;
+	my $h = $data->{hosts}->{$host};
+
+	my @services = grep { filter_service($_) } @{ $data->{services}->{$host} };
+
+	for my $s (@services) {
+		given ($s->{current_state}) {
+			when (0) { $ok++ }
+			when (1) { $warn++ }
+			when (2) { $crit++ }
+			when (3) { $unk++ }
+		}
+	}
+
+	printf('%-32.32s %s',
+		$h->{host_name},
+		host_state($h->{has_been_checked}, $h->{current_state} ) );
+
+	printf('  %s  %s  %s  %s',
+		pretty_state($ok, 'ok'),
+		pretty_state($warn, 'warning'),
+		pretty_state($crit, 'critical'),
+		pretty_state($unk, 'unknown'),
+	);
+
+	print "\n";
+}
+
+sub display_overview {
+	my ($h_ok, $h_d, $h_u, $s_ok, $s_w, $s_c, $s_u) = (0) x 7;
+
+	for my $h (@list_hosts) {
+		given ($data->{hosts}{$h}{current_state}) {
+			when (0) { $h_ok++ }
+			when (1) { $h_d++ }
+			when (2) { $h_u++ }
+		}
+		for my $s (grep { filter_service($_) } @{ $data->{services}{$h} }) {
+			given ($s->{current_state}) {
+				when (0) { $s_ok++ }
+				when (1) { $s_w++ }
+				when (2) { $s_c++ }
+				when (3) { $s_u++ }
+			}
+		}
+	}
+
+	printf("%-16.16s  %4s\n", 'total hosts', $h_ok + $h_d + $h_u);
+	printf("%-16.16s  %s\n", 'up', pretty_state($h_ok, 'ok'));
+	printf("%-16.16s  %s\n", 'down', pretty_state($h_d, 'critical'));
+	printf("%-16.16s  %s\n", 'unreachable', pretty_state($h_u, 'unknown'));
+	print "\n";
+	printf("%-16.16s  %4s\n", 'total services', $s_ok + $s_w + $s_c + $s_u);
+	printf("%-16.16s  %s\n", 'ok', pretty_state($s_ok, 'ok'));
+	printf("%-16.16s  %s\n", 'warning', pretty_state($s_w, 'warning'));
+	printf("%-16.16s  %s\n", 'critical', pretty_state($s_c, 'critical'));
+	printf("%-16.16s  %s\n", 'unknown', pretty_state($s_u, 'unknown'));
+}
+
+
 sub dispatch_command {
 	my $str = join( ';', @_ );
 
@@ -815,6 +896,7 @@ GetOptions(
 	'h|host=s'        => sub { push( @for_hosts, split( /,/, $_[1] ) ) },
 	'l|list=s'        => sub { $list_type = substr( $_[1], 0, 1 ) },
 	'm|match=s'       => sub { $match_output = qr{$_[1]}i },
+	'o|overview'      => \$overview,
 	'r|recheck'       => sub { $recheck = 1; $list_type = q{} },
 	's|service=s' => sub { push( @for_services, split( /,/, $_[1] ) ) },
 	'u|force-recheck' => sub { $force_recheck = 1; $list_type = q{} },
@@ -874,8 +956,18 @@ if ( $list_type eq 'h' ) {
 	@list_hosts = grep { filter_host( $data->{'hosts'}->{$_} ) } @list_hosts;
 }
 
-if ( $list_type ~~ [qw[s h]] ) {
-	foreach my $host (@list_hosts) {
+if ( $overview ) {
+	if ($list_type eq 'h') {
+		for my $host (@list_hosts) {
+			display_host_overview( $host );
+		}
+	}
+	else {
+		display_overview();
+	}
+}
+elsif ( $list_type ~~ [qw[s h]] ) {
+	for my $host (@list_hosts) {
 		display_host( $host, ( @list_hosts > 1 ) );
 	}
 }
@@ -994,6 +1086,15 @@ Note that only the first character of the argument is checked, so C<< icli
 
 Limit selection to hosts/services whose plugin output matches
 I<regex> (perl regular expression, case insensitive. see L<perlre>).
+
+=item B<-o>|B<--overview>
+
+Display "tactical overview"-style overview.
+By default (or when used with C<< -ls >>) the number of all hosts and services
+(both total and divided by their state) is shown.
+
+When used with C<< -lh >>, lists all hosts with the number of ok / warning /
+... checks on each host.
 
 =item B<-r>|B<--recheck>
 
