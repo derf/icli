@@ -1,3 +1,9 @@
+icli 0.44 - Sat Mar 16 2013
+
+    * Ignore 'module' field in the icinga status file
+    * Add -o / --overview option to display a 'tactical overview'-style
+      host and service listing
+
 icli 0.43 - Tue Aug 28 2012
 
     * Add missing documentation for -a / --acknowledge
