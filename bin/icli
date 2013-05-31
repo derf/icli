@@ -368,7 +368,7 @@ sub read_objects_line {
 				[
 					qw[
 					  timeperiod command contactgroup contact host service
-					  servicedependency module serviceescalation
+					  servicedependency serviceescalation module
 					  ]
 				]
 			  )
