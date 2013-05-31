@@ -27,6 +27,7 @@ my $verbosity     = 1;
 my $overview      = 0;
 my $recheck       = 0;
 my $force_recheck = 0;
+my $notifications = undef;
 my $match_output  = undef;
 my $acknowledge   = undef;
 my $as_contact    = undef;
@@ -369,7 +370,7 @@ sub read_objects_line {
 				[
 					qw[
 					  timeperiod command contactgroup contact host service
-					  servicedependency module
+					  servicedependency serviceescalation module
 					  ]
 				]
 			  )
@@ -864,6 +865,16 @@ sub acknowledge_service {
 	say "Acknowledged $host/$service: $acknowledge";
 }
 
+sub disable_notifications {
+	dispatch_command( 'DISABLE_NOTIFICATIONS', time() );
+	say "Temporarily disabled all notifications";
+}
+
+sub enable_notifications {
+	dispatch_command( 'ENABLE_NOTIFICATIONS', time() );
+	say "Temporarily enabled all notifications";
+}
+
 sub action_on_host {
 	my ($h) = @_;
 
@@ -891,24 +902,25 @@ sub action_on_service {
 }
 
 GetOptions(
-	'a|acknowledge=s' => sub { $acknowledge = $_[1]; $list_type = q{} },
-	'c|config=s'      => \$config_file,
-	'C|no-colours'    => sub { $colours = 0 },
-	'f|status-file=s' => \$status_file,
-	'F|rw-file=s'     => \$rw_file,
-	'g|hostgroup=s'   => sub { push( @for_groups, split( /,/, $_[1] ) ) },
-	'h|host=s'        => sub { push( @for_hosts, split( /,/, $_[1] ) ) },
-	'l|list=s'        => sub { $list_type = substr( $_[1], 0, 1 ) },
-	'm|match=s'       => sub { $match_output = qr{$_[1]}i },
-	'o|overview'      => \$overview,
-	'r|recheck'       => sub { $recheck = 1; $list_type = q{} },
-	's|service=s' => sub { push( @for_services, split( /,/, $_[1] ) ) },
-	'u|force-recheck' => sub { $force_recheck = 1; $list_type = q{} },
-	'U|as-contact=s'  => \$as_contact,
-	'v|verbose+' => \$verbosity,
-	'V|version' => sub { say "icli version $VERSION"; exit 0 },
-	'x|cut-mode=s' => sub { $cut_mode = substr( $_[1], 0, 1 ) },
-	'z|filter=s' => sub { push( @filters, split( /,/, $_[1] ) ) },
+	'a|acknowledge=s'   => sub { $acknowledge = $_[1]; $list_type = q{} },
+	'c|config=s'        => \$config_file,
+	'C|no-colours'      => sub { $colours = 0 },
+	'f|status-file=s'   => \$status_file,
+	'F|rw-file=s'       => \$rw_file,
+	'g|hostgroup=s'     => sub { push( @for_groups, split( /,/, $_[1] ) ) },
+	'h|host=s'          => sub { push( @for_hosts, split( /,/, $_[1] ) ) },
+	'l|list=s'          => sub { $list_type = substr( $_[1], 0, 1 ) },
+	'm|match=s'         => sub { $match_output = qr{$_[1]}i },
+	'n|notifications=s' => sub { $notifications = $_[1]; $list_type = q{} },
+	'o|overview'        => \$overview,
+	'r|recheck'         => sub { $recheck = 1; $list_type = q{} },
+	's|service=s'       => sub { push( @for_services, split( /,/, $_[1] ) ) },
+	'u|force-recheck'   => sub { $force_recheck = 1; $list_type = q{} },
+	'U|as-contact=s'    => \$as_contact,
+	'v|verbose+'        => \$verbosity,
+	'V|version'         => sub { say "icli version $VERSION"; exit 0 },
+	'x|cut-mode=s'      => sub { $cut_mode = substr( $_[1], 0, 1 ) },
+	'z|filter=s'        => sub { push( @filters, split( /,/, $_[1] ) ) },
 ) or die("Please see perldoc -F $0 for help\n");
 
 read_objects( $status_file, \$data );
@@ -1003,6 +1015,12 @@ elsif ( $recheck or $acknowledge ) {
 		}
 	}
 }
+elsif ( $notifications eq 'off' ) {
+	disable_notifications();	
+}
+elsif ( $notifications eq 'on' ) {
+	enable_notifications();	
+}
 else {
 	die("See perldoc -F $0\n");
 }
@@ -1090,6 +1108,10 @@ Note that only the first character of the argument is checked, so C<< icli
 
 Limit selection to hosts/services whose plugin output matches
 I<regex> (perl regular expression, case insensitive. see L<perlre>).
+
+=item B<-n>|B<--notifications> I<on/off>
+
+Enable or disable all notifications completely
 
 =item B<-o>|B<--overview>
 
