@@ -231,6 +231,8 @@ sub filter_generic {
 			or ( $f eq '!D' and not check_is_host_down($x) )
 			or ( $f eq 'F'  and $x->{'is_flapping'} )
 			or ( $f eq '!F' and not $x->{'is_flapping'} )
+			or ( $f eq 'N'  and not $x->{'notifications_enabled'} )
+			or ( $f eq '!N' and $x->{'notifications_enabled'} )
 			or (    $f eq 'P'
 				and $x->{'passive_checks_enabled'}
 				and not $x->{'active_checks_enabled'} )
