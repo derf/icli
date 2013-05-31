@@ -1,6 +1,7 @@
 git HEAD
 
     * Fix --filter N and --filter !N
+    * Ignore 'serviceescalation' field in the icinga status file
 
 icli 0.44 - Sat Mar 16 2013
 
