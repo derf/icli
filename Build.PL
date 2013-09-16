@@ -29,6 +29,7 @@ my $build = Module::Build->subclass(
 		'Term::Size' => 0,
 	},
 	script_files => 'bin/',
+	sign => 1,
 	test_types => {
 		author => '.at',
 	},
