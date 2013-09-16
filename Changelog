@@ -1,7 +1,8 @@
-git HEAD
+icli 0.45 - Tue Sep 17 2013
 
     * Fix --filter N and --filter !N
     * Ignore 'serviceescalation' field in the icinga status file
+    * fix smartmatch warnings on perl >= 5.018
 
 icli 0.44 - Sat Mar 16 2013
 
