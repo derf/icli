@@ -2,6 +2,7 @@ git HEAD
 
     * Fix !o filter not matching pending services
     * Add p filter (pending hosts/services)
+    * Show pending hosts/services with --overview
 
 icli 0.45 - Tue Sep 17 2013
 

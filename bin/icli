@@ -134,7 +134,10 @@ sub pretty_state {
 	if ($count == 0) {
 		return q{    };
 	}
-	return with_colour(sprintf('%4d', $count), $colour);
+	if ($colour) {
+		return with_colour(sprintf('%4d', $count), $colour);
+	}
+	return sprintf('%4d', $count);
 }
 
 sub split_by_words {
@@ -771,17 +774,22 @@ sub display_host {
 
 sub display_host_overview {
 	my ($host) = @_;
-	my ($ok, $warn, $crit, $unk) = (0) x 4;
+	my ($ok, $warn, $crit, $unk, $pend) = (0) x 5;
 	my $h = $data->{hosts}->{$host};
 
 	my @services = grep { filter_service($_) } @{ $data->{services}->{$host} };
 
 	for my $s (@services) {
-		given ($s->{current_state}) {
-			when (0) { $ok++ }
-			when (1) { $warn++ }
-			when (2) { $crit++ }
-			when (3) { $unk++ }
+		if ($s->{has_been_checked} == 0) {
+			$pend++;
+		}
+		else {
+			given ($s->{current_state}) {
+				when (0) { $ok++ }
+				when (1) { $warn++ }
+				when (2) { $crit++ }
+				when (3) { $unk++ }
+			}
 		}
 	}
 
@@ -789,31 +797,42 @@ sub display_host_overview {
 		$h->{host_name},
 		host_state($h ) );
 
-	printf('  %s  %s  %s  %s',
+	printf('  %s  %s  %s  %s  %s',
 		pretty_state($ok, 'ok'),
 		pretty_state($warn, 'warning'),
 		pretty_state($crit, 'critical'),
 		pretty_state($unk, 'unknown'),
+		pretty_state($pend, 'pending'),
 	);
 
 	print "\n";
 }
 
 sub display_overview {
-	my ($h_ok, $h_d, $h_u, $s_ok, $s_w, $s_c, $s_u) = (0) x 7;
+	my ($h_ok, $h_d, $h_u, $h_p, $s_ok, $s_w, $s_c, $s_u, $s_p) = (0) x 9;
 
 	for my $h (@list_hosts) {
-		given ($data->{hosts}{$h}{current_state}) {
-			when (0) { $h_ok++ }
-			when (1) { $h_d++ }
-			when (2) { $h_u++ }
+		if ($data->{hosts}{$h}{has_been_checked} == 0) {
+			$h_p++;
+		}
+		else {
+			given ($data->{hosts}{$h}{current_state}) {
+				when (0) { $h_ok++ }
+				when (1) { $h_d++ }
+				when (2) { $h_u++ }
+			}
 		}
 		for my $s (grep { filter_service($_) } @{ $data->{services}{$h} }) {
-			given ($s->{current_state}) {
-				when (0) { $s_ok++ }
-				when (1) { $s_w++ }
-				when (2) { $s_c++ }
-				when (3) { $s_u++ }
+			if ($s->{has_been_checked} == 0) {
+				$s_p++;
+			}
+			else {
+				given ($s->{current_state}) {
+					when (0) { $s_ok++ }
+					when (1) { $s_w++ }
+					when (2) { $s_c++ }
+					when (3) { $s_u++ }
+				}
 			}
 		}
 	}
@@ -822,12 +841,14 @@ sub display_overview {
 	printf("%-16.16s  %s\n", 'up', pretty_state($h_ok, 'ok'));
 	printf("%-16.16s  %s\n", 'down', pretty_state($h_d, 'critical'));
 	printf("%-16.16s  %s\n", 'unreachable', pretty_state($h_u, 'unknown'));
+	printf("%-16.16s  %s\n", 'pending', pretty_state($h_p, 'pending'));
 	print "\n";
 	printf("%-16.16s  %4s\n", 'total services', $s_ok + $s_w + $s_c + $s_u);
 	printf("%-16.16s  %s\n", 'ok', pretty_state($s_ok, 'ok'));
 	printf("%-16.16s  %s\n", 'warning', pretty_state($s_w, 'warning'));
 	printf("%-16.16s  %s\n", 'critical', pretty_state($s_c, 'critical'));
 	printf("%-16.16s  %s\n", 'unknown', pretty_state($s_u, 'unknown'));
+	printf("%-16.16s  %s\n", 'pending', pretty_state($s_p, 'pending'));
 }
 
 
