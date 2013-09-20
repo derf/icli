@@ -1,3 +1,8 @@
+git HEAD
+
+    * Fix !o filter not matching pending services
+    * Add p filter (pending hosts/services)
+
 icli 0.45 - Tue Sep 17 2013
 
     * Fix --filter N and --filter !N

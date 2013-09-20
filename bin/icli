@@ -240,8 +240,10 @@ sub filter_generic {
 			or ( $f eq '!P' and $x->{'active_checks_enabled'} )
 			or ( $f eq 'S'  and check_is_soft($x) )
 			or ( $f eq '!S' and not check_is_soft($x) )
+			or ( $f eq 'p'  and $x->{'has_been_checked'} == 0 )
+			or ( $f eq '!p' and $x->{'has_been_checked'} != 0 )
 			or ( $f eq 'o'  and $x->{'current_state'} == 0 )
-			or ( $f eq '!o' and $x->{'current_state'} != 0 )
+			or ( $f eq '!o' and($x->{'current_state'} != 0 or $x->{'has_been_checked'} == 0) )
 			or ( $f eq 'w'  and $x->{'current_state'} == 1 )
 			or ( $f eq '!w' and $x->{'current_state'} != 1 )
 			or ( $f eq 'c'  and $x->{'current_state'} == 2 )
@@ -1248,6 +1250,10 @@ Service state is Critical
 =item B<u>
 
 Service state is Unknown
+
+=item B<p>
+
+Host or service state is Pending
 
 =item B<d>
 
