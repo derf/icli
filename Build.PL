@@ -15,6 +15,9 @@ my $build = Module::Build->subclass(
 		'Test::Pod' => 0,
 		'Test::Command' => 0,
 	},
+	configure_requires => {
+		'Module::Build' => 0,
+	},
 	dist_name => 'icli',
 	dist_version_from => 'bin/icli',
 	license => 'unrestricted',

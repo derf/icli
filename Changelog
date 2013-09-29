@@ -1,8 +1,9 @@
-git HEAD
+icli 0.46 - Sun Sep 29 2013
 
     * Fix !o filter not matching pending services
     * Add p filter (pending hosts/services)
     * Show pending hosts/services with --overview
+    * Remove Date::Format dependency (now uses POSIX::strftime)
 
 icli 0.45 - Tue Sep 17 2013
 
