@@ -10,9 +10,9 @@ use 5.010;
 no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 use Carp qw(croak);
-use Date::Format;
 use Getopt::Long qw/:config bundling/;
 use List::MoreUtils qw(any firstval);
+use POSIX qw(strftime);
 use Term::ANSIColor;
 use Term::Size;
 
@@ -86,7 +86,7 @@ sub pretty_date {
 		return 'never';
 	}
 
-	return time2str( '%Y-%m-%d %H:%M:%S', $unix );
+	return strftime( '%Y-%m-%d %H:%M:%S', localtime($unix) );
 }
 
 sub pretty_duration {
@@ -1299,8 +1299,6 @@ None.
 =over
 
 =item * autodie (included with perl >= 5.10.1)
-
-=item * Date::Format
 
 =item * Term::Size
 
