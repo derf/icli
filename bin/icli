@@ -7,7 +7,7 @@ use strict;
 use warnings;
 use 5.010;
 
-no if $] >= 5.018, warnings => "experimental::smartmatch";
+no if $] >= 5.018, warnings => 'experimental::smartmatch';
 
 use App::Icli::ConfigData;
 use Carp qw(croak);
@@ -121,24 +121,23 @@ sub pretty_yesno {
 }
 
 sub pretty_state {
-	my ($count, $state) = @_;
-	my $ret;
+	my ( $count, $state ) = @_;
 	my $colour;
 
 	given ($state) {
-		when ('ok') { $colour = 'black on_green' }
-		when ('warning') { $colour = 'black on_yellow' }
+		when ('ok')       { $colour = 'black on_green' }
+		when ('warning')  { $colour = 'black on_yellow' }
 		when ('critical') { $colour = 'white on_red' }
-		when ('unknown') { $colour = 'white on_blue' }
+		when ('unknown')  { $colour = 'white on_blue' }
 	}
 
-	if ($count == 0) {
+	if ( $count == 0 ) {
 		return q{    };
 	}
 	if ($colour) {
-		return with_colour(sprintf('%4d', $count), $colour);
+		return with_colour( sprintf( '%4d', $count ), $colour );
 	}
-	return sprintf('%4d', $count);
+	return sprintf( '%4d', $count );
 }
 
 sub split_by_words {
@@ -224,7 +223,7 @@ sub filter_generic {
 	my ($x) = @_;
 	my $filters_unfulfilled = @filters;
 
-	if ($match_output and not $x->{plugin_output} =~ $match_output) {
+	if ( $match_output and not $x->{plugin_output} =~ $match_output ) {
 		return 0;
 	}
 
@@ -247,7 +246,10 @@ sub filter_generic {
 			or ( $f eq 'p'  and $x->{'has_been_checked'} == 0 )
 			or ( $f eq '!p' and $x->{'has_been_checked'} != 0 )
 			or ( $f eq 'o'  and $x->{'current_state'} == 0 )
-			or ( $f eq '!o' and($x->{'current_state'} != 0 or $x->{'has_been_checked'} == 0) )
+			or ( $f eq '!o'
+				and
+				( $x->{'current_state'} != 0 or $x->{'has_been_checked'} == 0 )
+			)
 			or ( $f eq 'w'  and $x->{'current_state'} == 1 )
 			or ( $f eq '!w' and $x->{'current_state'} != 1 )
 			or ( $f eq 'c'  and $x->{'current_state'} == 2 )
@@ -297,7 +299,7 @@ sub filter_service {
 		return 0;
 	}
 
-	if ($as_contact and not has_contact($s, $as_contact)) {
+	if ( $as_contact and not has_contact( $s, $as_contact ) ) {
 		return 0;
 	}
 
@@ -305,12 +307,13 @@ sub filter_service {
 }
 
 sub has_contact {
-	my ($s, $contact) = @_;
+	my ( $s, $contact ) = @_;
 
-	my $conf_s = firstval { $_->{service_description} eq $s->{service_description } }
-		@{ $config->{services}{$s->{host_name}}};
+	my $conf_s
+	  = firstval { $_->{service_description} eq $s->{service_description} }
+	@{ $config->{services}{ $s->{host_name} } };
 
-	return any { $_ eq $contact } @{$conf_s->{contacts}};
+	return any { $_ eq $contact } @{ $conf_s->{contacts} };
 }
 
 sub read_objects_line {
@@ -371,7 +374,7 @@ sub read_objects_line {
 			}
 			when ('contactgroup') {
 				${$ref}->{contactgroups}->{ $cache->{contactgroup_name} }
-					= [split(m{, *}, $cache->{members})];
+				  = [ split( m{, *}, $cache->{members} ) ];
 			}
 			when (
 				[
@@ -415,21 +418,24 @@ sub enhance_status {
 	}
 	HOST: for my $h ( keys %{ $config->{services} } ) {
 		for my $s ( @{ $config->{services}->{$h} } ) {
-			if ($s->{contacts}) {
+			if ( $s->{contacts} ) {
 				$s->{contacts} =~ s{^ *}{}o;
-				$s->{contacts} = [split(m{, *}, $s->{contacts})];
+				$s->{contacts} = [ split( m{, *}, $s->{contacts} ) ];
 			}
-			for my $group (split(m{, *}, $s->{contact_groups})) {
-				push(@{$s->{contacts}}, @{$config->{contactgroups}{$group}});
+			for my $group ( split( m{, *}, $s->{contact_groups} ) ) {
+				push(
+					@{ $s->{contacts} },
+					@{ $config->{contactgroups}{$group} }
+				);
 			}
 		}
 	}
 }
 
 sub service_state {
-	my ($s) = @_;
+	my ($s)     = @_;
 	my $checked = $s->{has_been_checked};
-	my $digit = $s->{current_state};
+	my $digit   = $s->{current_state};
 
 	if ( not $checked ) {
 		return 'PENDING ';
@@ -440,14 +446,14 @@ sub service_state {
 		when (1) { return with_colour( ' WARNING', 'black on_yellow' ) }
 		when (2) { return with_colour( 'CRITICAL', 'white on_red' ) }
 		when (3) { return with_colour( ' UNKNOWN', 'white on_blue' ) }
-		default  { croak("Unknown service state: $digit\n") }
+		default { croak("Unknown service state: $digit\n") }
 	}
 }
 
 sub host_state {
-	my ( $h ) = @_;
+	my ($h)     = @_;
 	my $checked = $h->{has_been_checked};
-	my $digit = $h->{current_state};
+	my $digit   = $h->{current_state};
 
 	if ( not $checked ) {
 		return '  PENDING  ';
@@ -543,7 +549,7 @@ sub display_x_verbose {
 			printf(
 				"%-16s : %s (for %s)%s\n",
 				'Status',
-				host_state( $x ),
+				host_state($x),
 				pretty_duration( $x->{'last_state_change'} ),
 				(
 					$x->{'problem_has_been_acknowledged'}
@@ -680,8 +686,7 @@ sub display_service {
 			print with_colour( $flags, 'bold' );
 		}
 
-		printf( ' %s',
-			service_state( $s) );
+		printf( ' %s', service_state($s) );
 
 		if ( $v >= 2 ) {
 			printf( ' %d/%d', $s->{'current_attempt'}, $s->{'max_attempts'} );
@@ -745,9 +750,7 @@ sub display_host_single {
 
 	if ( $v < 3 ) {
 
-		printf( '%-32.32s %s',
-			$h->{host_name},
-			host_state( $h ) );
+		printf( '%-32.32s %s', $h->{host_name}, host_state($h) );
 
 		if ( $v >= 2 ) {
 			printf( ' %d/%d', $h->{'current_attempt'}, $h->{'max_attempts'} );
@@ -775,17 +778,17 @@ sub display_host {
 
 sub display_host_overview {
 	my ($host) = @_;
-	my ($ok, $warn, $crit, $unk, $pend) = (0) x 5;
+	my ( $ok, $warn, $crit, $unk, $pend ) = (0) x 5;
 	my $h = $data->{hosts}->{$host};
 
 	my @services = grep { filter_service($_) } @{ $data->{services}->{$host} };
 
 	for my $s (@services) {
-		if ($s->{has_been_checked} == 0) {
+		if ( $s->{has_been_checked} == 0 ) {
 			$pend++;
 		}
 		else {
-			given ($s->{current_state}) {
+			given ( $s->{current_state} ) {
 				when (0) { $ok++ }
 				when (1) { $warn++ }
 				when (2) { $crit++ }
@@ -794,41 +797,40 @@ sub display_host_overview {
 		}
 	}
 
-	printf('%-32.32s %s',
-		$h->{host_name},
-		host_state($h ) );
+	printf( '%-32.32s %s', $h->{host_name}, host_state($h) );
 
-	printf('  %s  %s  %s  %s  %s',
-		pretty_state($ok, 'ok'),
-		pretty_state($warn, 'warning'),
-		pretty_state($crit, 'critical'),
-		pretty_state($unk, 'unknown'),
-		pretty_state($pend, 'pending'),
+	printf(
+		'  %s  %s  %s  %s  %s',
+		pretty_state( $ok,   'ok' ),
+		pretty_state( $warn, 'warning' ),
+		pretty_state( $crit, 'critical' ),
+		pretty_state( $unk,  'unknown' ),
+		pretty_state( $pend, 'pending' ),
 	);
 
 	print "\n";
 }
 
 sub display_overview {
-	my ($h_ok, $h_d, $h_u, $h_p, $s_ok, $s_w, $s_c, $s_u, $s_p) = (0) x 9;
+	my ( $h_ok, $h_d, $h_u, $h_p, $s_ok, $s_w, $s_c, $s_u, $s_p ) = (0) x 9;
 
 	for my $h (@list_hosts) {
-		if ($data->{hosts}{$h}{has_been_checked} == 0) {
+		if ( $data->{hosts}{$h}{has_been_checked} == 0 ) {
 			$h_p++;
 		}
 		else {
-			given ($data->{hosts}{$h}{current_state}) {
+			given ( $data->{hosts}{$h}{current_state} ) {
 				when (0) { $h_ok++ }
 				when (1) { $h_d++ }
 				when (2) { $h_u++ }
 			}
 		}
-		for my $s (grep { filter_service($_) } @{ $data->{services}{$h} }) {
-			if ($s->{has_been_checked} == 0) {
+		for my $s ( grep { filter_service($_) } @{ $data->{services}{$h} } ) {
+			if ( $s->{has_been_checked} == 0 ) {
 				$s_p++;
 			}
 			else {
-				given ($s->{current_state}) {
+				given ( $s->{current_state} ) {
 					when (0) { $s_ok++ }
 					when (1) { $s_w++ }
 					when (2) { $s_c++ }
@@ -838,20 +840,19 @@ sub display_overview {
 		}
 	}
 
-	printf("%-16.16s  %4s\n", 'total hosts', $h_ok + $h_d + $h_u);
-	printf("%-16.16s  %s\n", 'up', pretty_state($h_ok, 'ok'));
-	printf("%-16.16s  %s\n", 'down', pretty_state($h_d, 'critical'));
-	printf("%-16.16s  %s\n", 'unreachable', pretty_state($h_u, 'unknown'));
-	printf("%-16.16s  %s\n", 'pending', pretty_state($h_p, 'pending'));
+	printf( "%-16.16s  %4s\n", 'total hosts', $h_ok + $h_d + $h_u );
+	printf( "%-16.16s  %s\n", 'up', pretty_state( $h_ok, 'ok' ) );
+	printf( "%-16.16s  %s\n", 'down', pretty_state( $h_d, 'critical' ) );
+	printf( "%-16.16s  %s\n", 'unreachable', pretty_state( $h_u, 'unknown' ) );
+	printf( "%-16.16s  %s\n", 'pending',     pretty_state( $h_p, 'pending' ) );
 	print "\n";
-	printf("%-16.16s  %4s\n", 'total services', $s_ok + $s_w + $s_c + $s_u);
-	printf("%-16.16s  %s\n", 'ok', pretty_state($s_ok, 'ok'));
-	printf("%-16.16s  %s\n", 'warning', pretty_state($s_w, 'warning'));
-	printf("%-16.16s  %s\n", 'critical', pretty_state($s_c, 'critical'));
-	printf("%-16.16s  %s\n", 'unknown', pretty_state($s_u, 'unknown'));
-	printf("%-16.16s  %s\n", 'pending', pretty_state($s_p, 'pending'));
+	printf( "%-16.16s  %4s\n", 'total services', $s_ok + $s_w + $s_c + $s_u );
+	printf( "%-16.16s  %s\n", 'ok', pretty_state( $s_ok, 'ok' ) );
+	printf( "%-16.16s  %s\n", 'warning', pretty_state( $s_w, 'warning' ) );
+	printf( "%-16.16s  %s\n", 'critical', pretty_state( $s_c, 'critical' ) );
+	printf( "%-16.16s  %s\n", 'unknown',  pretty_state( $s_u, 'unknown' ) );
+	printf( "%-16.16s  %s\n", 'pending',  pretty_state( $s_p, 'pending' ) );
 }
-
 
 sub dispatch_command {
 	my $str = join( ';', @_ );
@@ -925,13 +926,13 @@ GetOptions(
 	'g|hostgroup=s'   => sub { push( @for_groups, split( /,/, $_[1] ) ) },
 	'h|host=s'        => sub { push( @for_hosts, split( /,/, $_[1] ) ) },
 	'l|list=s'        => sub { $list_type = substr( $_[1], 0, 1 ) },
-	'm|match=s'       => sub { $match_output = qr{$_[1]}i },
-	'o|overview'      => \$overview,
-	'r|recheck'       => sub { $recheck = 1; $list_type = q{} },
+	'm|match=s' => sub { $match_output = qr{$_[1]}i },
+	'o|overview' => \$overview,
+	'r|recheck'  => sub { $recheck = 1; $list_type = q{} },
 	's|service=s' => sub { push( @for_services, split( /,/, $_[1] ) ) },
 	'u|force-recheck' => sub { $force_recheck = 1; $list_type = q{} },
 	'U|as-contact=s'  => \$as_contact,
-	'v|verbose+' => \$verbosity,
+	'v|verbose+'      => \$verbosity,
 	'V|version' => sub { say "icli version $VERSION"; exit 0 },
 	'x|cut-mode=s' => sub { $cut_mode = substr( $_[1], 0, 1 ) },
 	'z|filter=s' => sub { push( @filters, split( /,/, $_[1] ) ) },
@@ -986,10 +987,10 @@ if ( $list_type eq 'h' ) {
 	@list_hosts = grep { filter_host( $data->{'hosts'}->{$_} ) } @list_hosts;
 }
 
-if ( $overview ) {
-	if ($list_type eq 'h') {
+if ($overview) {
+	if ( $list_type eq 'h' ) {
 		for my $host (@list_hosts) {
-			display_host_overview( $host );
+			display_host_overview($host);
 		}
 	}
 	else {
