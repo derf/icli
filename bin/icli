@@ -2,7 +2,6 @@
 ## Copyright © 2010-2012 by Daniel Friesel <derf@finalrewind.org>
 ## License: WTFPL <http://sam.zoy.org/wtfpl>
 ##   0. You just DO WHAT THE FUCK YOU WANT TO.
-use autodie;
 use strict;
 use warnings;
 use 5.010;
@@ -397,14 +396,19 @@ sub read_objects_line {
 }
 
 sub read_objects {
-	my ( $file, $ref ) = @_;
+	my ( $file, $ref, $description, $opt ) = @_;
 
-	open( my $fh, '<', $file );
+	open( my $fh, '<', $file )
+	  or die( "Failed to read $description ($file): $!\n"
+		  . "Set $opt to change it\n" );
+
 	while ( my $line = <$fh> ) {
 		chomp($line);
 		read_objects_line( $line, $ref );
 	}
-	close($fh);
+
+	close($fh)
+	  or warn("Failed to close $description ($file): $!\n");
 }
 
 sub enhance_status {
@@ -857,9 +861,12 @@ sub display_overview {
 sub dispatch_command {
 	my $str = join( ';', @_ );
 
-	open( my $cmd_fh, '>', $rw_file );
+	open( my $cmd_fh, '>', $rw_file )
+	  or die( "Failed to open icinga command file ($rw_file): $!\n"
+		  . "Set --rw-file to change it\n" );
 	printf $cmd_fh ( '[%d] %s', time(), $str, );
-	close($cmd_fh);
+	close($cmd_fh)
+	  or warn("Failed to close $rw_file: $!\n");
 }
 
 sub recheck_host_all {
@@ -938,8 +945,8 @@ GetOptions(
 	'z|filter=s' => sub { push( @filters, split( /,/, $_[1] ) ) },
 ) or die("Please see perldoc -F $0 for help\n");
 
-read_objects( $status_file, \$data );
-read_objects( $config_file, \$config );
+read_objects( $status_file, \$data, 'icinga status_file', '--status-file' );
+read_objects( $config_file, \$config, 'icinga object_cache_file', '--config' );
 enhance_status();
 
 for my $arg (@ARGV) {

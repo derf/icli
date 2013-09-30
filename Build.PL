@@ -25,7 +25,6 @@ my $build = Module::Build->new(
 	module_name => 'App::Icli',
 	requires => {
 		'perl' => '5.10.0',
-		'autodie' => 0,
 		'Carp' => 0,
 		'Getopt::Long' => 0,
 		'List::MoreUtils' => 0,
