@@ -4,11 +4,7 @@ use strict;
 use warnings;
 use Module::Build;
 
-my $build = Module::Build->subclass(
-	code => q(
-		sub ACTION_testauthor { shift->generic_task(type => 'author') }
-	)
-)->new(
+my $build = Module::Build->new(
 	build_requires => {
 		'Test::More' => 0,
 		'Test::Compile' => 0,
@@ -18,9 +14,15 @@ my $build = Module::Build->subclass(
 	configure_requires => {
 		'Module::Build' => 0,
 	},
+	config_data => {
+		object_file => '/var/cache/icinga/objects.cache',
+		status_file => '/var/lib/icinga/status.dat',
+		command_file => '/var/lib/icinga/rw/icinga.cmd',
+	},
 	dist_name => 'icli',
 	dist_version_from => 'bin/icli',
 	license => 'unrestricted',
+	module_name => 'App::Icli',
 	requires => {
 		'perl' => '5.10.0',
 		'autodie' => 0,
@@ -37,4 +39,58 @@ my $build = Module::Build->subclass(
 		author => '.at',
 	},
 );
+
+print <<'EOF';
+
+-----------------------------------------------------------------------
+
+Note: To work with an Icinga installation, icli needs to know the path to
+three files:
+* objects.cache (icinga.cfg object_cache_file)
+* status.dat (icinga.cfg status_file)
+* icinga.cmd (icinga.cfg command_file)
+
+If you are building interactively and the default values for these paths
+do not exist, you will be asked for them -- hit return to keep the default.
+In a non-interactive build, the defaults will be used (unless changed using
+an option, see below).
+
+If you need to set them regardless of the build host, do not wish to be
+promited at all, or are using a non-interactive build process (perhaps even
+for a whole distribution), you can set them using the following options:
+perl Build.PL --icli-object-file=.../objects.cache \
+              --icli-status-file=.../status.dat \
+              --icli-command-file=.../icinga.cmd
+
+-----------------------------------------------------------------------
+
+EOF
+
+if ($build->args('icli-object-file')) {
+	$build->config_data(object_file => $build->args('icli-object-file'));
+}
+elsif (not -e $build->config_data('object_file')) {
+	my $reply = $build->prompt('Enter location of Icinga objects.cache',
+		$build->config_data('object_file'));
+	$build->config_data(object_file => $reply);
+}
+
+if ($build->args('icli-status-file')) {
+	$build->config_data(status_file => $build->args('icli-status-file'));
+}
+elsif (not -e $build->config_data('status_file')) {
+	my $reply = $build->prompt('Enter location of Icinga status.dat',
+		$build->config_data('status_file'));
+	$build->config_data(status_file => $reply);
+}
+
+if ($build->args('icli-command-file')) {
+	$build->config_data(command_file => $build->args('icli-command-file'));
+}
+elsif (not -e $build->config_data('command_file')) {
+	my $reply = $build->prompt('Enter location of Icinga command pipe',
+		$build->config_data('command_file'));
+	$build->config_data(command_file => $reply);
+}
+
 $build->create_build_script();

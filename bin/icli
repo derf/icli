@@ -9,6 +9,7 @@ use 5.010;
 
 no if $] >= 5.018, warnings => "experimental::smartmatch";
 
+use App::Icli::ConfigData;
 use Carp qw(croak);
 use Getopt::Long qw/:config bundling/;
 use List::MoreUtils qw(any firstval);
@@ -19,9 +20,9 @@ use Term::Size;
 our $VERSION = '0.46';
 
 my ( $cache, $config, $data, $extra );
-my $config_file = '/var/cache/icinga/objects.cache';
-my $status_file = '/var/lib/icinga/status.dat';
-my $rw_file     = '/var/lib/icinga/rw/icinga.cmd';
+my $config_file = App::Icli::ConfigData->config('object_file');
+my $status_file = App::Icli::ConfigData->config('status_file');
+my $rw_file     = App::Icli::ConfigData->config('command_file');
 my $context;
 my $colours       = 1;
 my $list_type     = 's';
@@ -1080,8 +1081,7 @@ Note: Acknowledgement of host problems is not yet supported.
 
 =item B<-c>|B<--config> I<config>
 
-Read config from I<file> instead of the default
-F</var/cache/icinga/objects.cache>
+Read config from I<file>
 
 =item B<-C>|B<--no-colours>
 
@@ -1089,13 +1089,11 @@ Disable colours in output
 
 =item B<-f>|B<--status-file> I<file>
 
-Read the status from I<file> instead of the default
-F</var/lib/icinga/status.dat>
+Read the status from I<file>
 
 =item B<-F>|B<--rw-file> I<file>
 
-Use I<file> as external commands file. Default:
-F</var/lib/icinga/rw/icinga.cmd>
+Use I<file> as external commands file.
 
 =item B<-g>|B<--hostgroup> I<hostgroup>
 
