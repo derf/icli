@@ -1,3 +1,9 @@
+git HEAD
+
+    * Remove autodie dependency, improve error messages
+    * Allow build-item specification of icinga paths
+      (perl Build.PL --icli-xyz-file=..., see README)
+
 icli 0.46 - Sun Sep 29 2013
 
     * Fix !o filter not matching pending services
