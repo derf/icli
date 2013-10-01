@@ -12,7 +12,7 @@ my $build = Module::Build->new(
 		'Test::Command' => 0,
 	},
 	configure_requires => {
-		'Module::Build' => 0,
+		'Module::Build' => 0.40,
 	},
 	config_data => {
 		object_file => '/var/cache/icinga/objects.cache',
