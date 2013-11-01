@@ -15,6 +15,7 @@ use List::MoreUtils qw(any firstval);
 use POSIX qw(strftime);
 use Term::ANSIColor;
 use Term::Size;
+use Pod::Usage;
 
 our $VERSION = '0.46';
 
@@ -36,6 +37,8 @@ my $term_width    = Term::Size::chars();
 my $cut_mode      = 'b';
 my ( @for_hosts, @for_groups, @for_services, @list_hosts, @list_services );
 my @filters;
+my $help;
+my $man;
 
 sub have_host {
 	my ($host) = @_;
@@ -934,7 +937,12 @@ GetOptions(
 	'V|version' => sub { say "icli version $VERSION"; exit 0 },
 	'x|cut-mode=s' => sub { $cut_mode = substr( $_[1], 0, 1 ) },
 	'z|filter=s' => sub { push( @filters, split( /,/, $_[1] ) ) },
+        'help|?' => \$help,
+        'man' => \$man,
 ) or die("Please see perldoc -F $0 for help\n");
+
+pod2usage(1) if $help;
+pod2usage(-verbose => 2) if $man;
 
 read_objects( $status_file, \$data );
 read_objects( $config_file, \$config );
