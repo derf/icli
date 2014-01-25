@@ -373,7 +373,7 @@ sub read_objects_line {
 			}
 			when ('contactgroup') {
 				${$ref}->{contactgroups}->{ $cache->{contactgroup_name} }
-				  = [ split( m{, *}, $cache->{members} ) ];
+				  = [ split( m{, *}, $cache->{members} // q{} ) ];
 			}
 			when (
 				[
