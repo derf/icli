@@ -5,6 +5,8 @@ git HEAD
       (perl Build.PL --icli-xyz-file=..., see README)
     * Do not throw warnings when encountering empty contact groups
     * Do not require --recheck when using --force-recheck
+    * Support --force-recheck with a host-only argument to immediately recheck
+      all services on a host
 
 icli 0.46 - Sun Sep 29 2013
 

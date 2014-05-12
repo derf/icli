@@ -883,6 +883,13 @@ sub recheck_service {
 	say "Scheduled check of '$service' on '$host'";
 }
 
+sub force_recheck_host_all {
+	my ($host) = @_;
+
+	dispatch_command( 'SCHEDULE_FORCED_HOST_SVC_CHECKS', $host, time() );
+	say "Scheduled forced check of * on '$host'";
+}
+
 sub force_recheck_service {
 	my ( $host, $service ) = @_;
 
@@ -903,6 +910,9 @@ sub action_on_host {
 
 	if ($recheck) {
 		recheck_host_all($h);
+	}
+	elsif ($force_recheck) {
+		force_recheck_host_all($h);
 	}
 }
 
