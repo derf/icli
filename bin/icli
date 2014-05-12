@@ -1017,7 +1017,7 @@ elsif ( $list_type eq 'd' ) {
 		display_downtime($downtime);
 	}
 }
-elsif ( $recheck or $acknowledge ) {
+elsif ( $recheck or $force_recheck or $acknowledge ) {
 
 	foreach my $host (@list_hosts) {
 		if ( not @list_services and not @filters ) {
