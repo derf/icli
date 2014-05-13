@@ -6,7 +6,8 @@ git HEAD
     * Do not throw warnings when encountering empty contact groups
     * Do not require --recheck when using --force-recheck
     * Support --force-recheck with a host-only argument to immediately recheck
-      all services on a host
+      all services on a host (closses #15)
+    * Fix -lh not showing serviceless hosts (closes #14)
 
 icli 0.46 - Sun Sep 29 2013
 
