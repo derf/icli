@@ -4,6 +4,21 @@ use strict;
 use warnings;
 use Module::Build;
 
+
+# defaults at the end
+my @object_paths = (
+	'/var/cache/icinga2/objects.cache',
+	'/var/cache/icinga/objects.cache',
+);
+my @status_paths = (
+	'/var/cache/icinga2/status.dat',
+	'/var/lib/icinga/status.dat',
+);
+my @command_paths = (
+	'/var/run/icinga2/cmd/icinga.cmd',
+	'/var/lib/icinga/rw/icinga.cmd',
+);
+
 my $build = Module::Build->new(
 	build_requires => {
 		'Test::More' => 0,
@@ -68,28 +83,49 @@ EOF
 if ($build->args('icli-object-file')) {
 	$build->config_data(object_file => $build->args('icli-object-file'));
 }
-elsif (not -e $build->config_data('object_file')) {
-	my $reply = $build->prompt('Enter location of Icinga objects.cache',
-		$build->config_data('object_file'));
-	$build->config_data(object_file => $reply);
+else {
+	for my $path (@object_paths) {
+		if (not -e $build->config_data('object_file')) {
+			$build->config_data(object_file => $path);
+		}
+	}
+	if (not -e $build->config_data('object_file')) {
+		my $reply = $build->prompt('Enter location of Icinga objects.cache',
+			$build->config_data('object_file'));
+		$build->config_data(object_file => $reply);
+	}
 }
 
 if ($build->args('icli-status-file')) {
 	$build->config_data(status_file => $build->args('icli-status-file'));
 }
-elsif (not -e $build->config_data('status_file')) {
-	my $reply = $build->prompt('Enter location of Icinga status.dat',
-		$build->config_data('status_file'));
-	$build->config_data(status_file => $reply);
+else {
+	for my $path (@status_paths) {
+		if (not -e $build->config_data('status_file')) {
+			$build->config_data(status_file => $path);
+		}
+	}
+	if (not -e $build->config_data('status_file')) {
+		my $reply = $build->prompt('Enter location of Icinga status.dat',
+			$build->config_data('status_file'));
+		$build->config_data(status_file => $reply);
+	}
 }
 
 if ($build->args('icli-command-file')) {
 	$build->config_data(command_file => $build->args('icli-command-file'));
 }
-elsif (not -e $build->config_data('command_file')) {
-	my $reply = $build->prompt('Enter location of Icinga command pipe',
-		$build->config_data('command_file'));
-	$build->config_data(command_file => $reply);
+else {
+	for my $path (@command_paths) {
+		if (not -e $build->config_data('command_file')) {
+			$build->config_data(command_file => $path);
+		}
+	}
+	if (not -e $build->config_data('command_file')) {
+		my $reply = $build->prompt('Enter location of Icinga command pipe',
+			$build->config_data('command_file'));
+		$build->config_data(command_file => $reply);
+	}
 }
 
 $build->create_build_script();
