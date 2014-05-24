@@ -1,7 +1,7 @@
-git HEAD
+icli 0.47 - Sat May 24 2014
 
     * Remove autodie dependency, improve error messages
-    * Allow build-item specification of icinga paths
+    * Allow build-time specification of icinga paths
       (perl Build.PL --icli-xyz-file=..., see README)
     * Do not throw warnings when encountering empty contact groups
     * Do not require --recheck when using --force-recheck

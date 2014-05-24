@@ -36,8 +36,8 @@ my $build = Module::Build->new(
 	},
 	dist_name => 'icli',
 	dist_version_from => 'bin/icli',
-	license => 'unrestricted',
 	module_name => 'App::Icli',
+	license => 'unrestricted',
 	requires => {
 		'perl' => '5.10.0',
 		'Carp' => 0,
