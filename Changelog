@@ -1,4 +1,4 @@
-icli 0.47 - Sat May 24 2014
+icli 0.47 - Thu May 29 2014
 
     * Remove autodie dependency, improve error messages
     * Allow build-time specification of icinga paths
