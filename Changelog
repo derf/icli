@@ -1,3 +1,10 @@
+git HEAD
+
+    * NOT BACKWARDS COMPATIBLE: Add -a/--action option to invoke generic
+      actions on selected services. This replaces -a/--acknowledge with
+      -a acknowledge, -r/--recheck with -a recheck and -u/--force-recheck
+      wiht -a force_recheck
+
 icli 0.47 - Thu May 29 2014
 
     * Remove autodie dependency, improve error messages
