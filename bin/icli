@@ -939,63 +939,48 @@ sub dispatch_command {
 	  or warn("Failed to close $rw_file: $!\n");
 }
 
-sub recheck_host_all {
-	my ($host) = @_;
-
-	dispatch_command( 'SCHEDULE_HOST_SVC_CHECKS', $host, time() );
-	say "Scheduled check of * on '$host'";
-}
-
-sub recheck_service {
-	my ( $host, $service ) = @_;
-
-	dispatch_command( 'SCHEDULE_SVC_CHECK', $host, $service, time() );
-	say "Scheduled check of '$service' on '$host'";
-}
-
-sub force_recheck_host_all {
-	my ($host) = @_;
-
-	dispatch_command( 'SCHEDULE_FORCED_HOST_SVC_CHECKS', $host, time() );
-	say "Scheduled forced check of * on '$host'";
-}
-
-sub force_recheck_service {
-	my ( $host, $service ) = @_;
-
-	dispatch_command( 'SCHEDULE_FORCED_SVC_CHECK', $host, $service, time() );
-	say "Scheduled forced check of '$service' on '$host'";
-}
-
-sub acknowledge_service {
-	my ( $host, $service ) = @_;
-
-	dispatch_command( 'ACKNOWLEDGE_SVC_PROBLEM', $host, $service, 2, 1, 1,
-		'cli', $action_args[0] );
-	say "Acknowledged $host/$service: $action_args[0]";
-}
-
 sub action_on_host {
-	my ($h) = @_;
+	my ($host) = @_;
 
 	given ($action) {
-		when ('recheck')       { recheck_host_all($h) }
-		when ('force_recheck') { force_recheck_host_all($h) }
-		default { say STDERR "Cannot run action '${action}' on a host" }
+		when ('recheck') {
+			dispatch_command( 'SCHEDULE_HOST_SVC_CHECKS', $host, time() );
+			say "Scheduled check of * on '$host'";
+		}
+		when ('force_recheck') {
+			dispatch_command( 'SCHEDULE_FORCED_HOST_SVC_CHECKS', $host, time() );
+			say "Scheduled forced check of * on '$host'";
+		}
+		default {
+			say STDERR "Cannot run action '${action}' on a host"
+		}
 	}
 }
 
 sub action_on_service {
-	my ( $h, $s ) = @_;
+	my ( $host, $service ) = @_;
 
-	if ( not have_service( $h, $s ) ) {
+	if ( not have_service( $host, $service ) ) {
 		return;
 	}
 
 	given ($action) {
-		when ('recheck') { recheck_service( $h, $s ) }
-		when ('force_recheck') { force_recheck_service( $h, $s ) }
-		when ('acknowledge') { acknowledge_service( $h, $s ) }
+		when ('recheck') {
+			dispatch_command( 'SCHEDULE_SVC_CHECK', $host, $service, time() );
+			say "Scheduled check of '$service' on '$host'";
+		}
+		when ('force_recheck') {
+			dispatch_command( 'SCHEDULE_FORCED_SVC_CHECK', $host, $service, time() );
+			say "Scheduled forced check of '$service' on '$host'";
+		}
+		when ('Acknowledge') {
+			dispatch_command( 'ACKNOWLEDGE_SVC_PROBLEM', $host, $service, 2, 1, 1,
+				'cli', $action_args[0] );
+			say "Acknowledged $host/$service: $action_args[0]";
+		}
+		default {
+			say STDERR "Cannot run action '${action}' on a service"
+		}
 	}
 }
 
