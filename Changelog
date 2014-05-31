@@ -1,9 +1,11 @@
 git HEAD
 
+    * New dependencies: DateTime and DateTime::Format::Strptime
     * NOT BACKWARDS COMPATIBLE: Add -a/--action option to invoke generic
       actions on selected services. This replaces -a/--acknowledge with
-      -a acknowledge, -r/--recheck with -a recheck and -u/--force-recheck
-      wiht -a force_recheck
+      -aa/ -a acknowledge, -r/--recheck with -ar / -a recheck and
+      -u/--force-recheck wiht -aR / -a force_recheck
+    * add -ad / -a downtime option to schedule host/service downtimes
 
 icli 0.47 - Thu May 29 2014
 

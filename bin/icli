@@ -10,6 +10,8 @@ no if $] >= 5.018, warnings => 'experimental::smartmatch';
 
 use App::Icli::ConfigData;
 use Carp qw(croak);
+use DateTime;
+use DateTime::Format::Strptime;
 use Getopt::Long qw/:config bundling/;
 use List::MoreUtils qw(any firstval);
 use POSIX qw(strftime);
@@ -440,13 +442,17 @@ sub parse_action {
 		return;
 	}
 
+	my @raw_args;
+
 	my %actionmap = (
 		a => 'acknowledge',
+		d => 'downtime',
 		r => 'recheck',
 		R => 'force_recheck',
 	);
 
-	( $action, @action_args ) = split( /:/, $action );
+	( $action, @raw_args ) = split( /:/, $action );
+	@action_args = split( /,/, join( ':', @raw_args ) );
 	$list_type = q{};
 
 	if ( exists $actionmap{$action} ) {
@@ -943,12 +949,41 @@ sub action_on_host {
 	my ($host) = @_;
 
 	given ($action) {
+		when ('downtime') {
+			my ( $start, $end, $duration, $comment, @opts ) = @action_args;
+			my $strp = DateTime::Format::Strptime->new(
+				pattern   => '%Y-%m-%dT%H:%M:%S',
+				time_zone => 'Europe/Berlin',       # TODO read from system
+			);
+
+			my $dt_start = $strp->parse_datetime($start);
+			my $dt_end   = $strp->parse_datetime($end);
+			my $fixed    = $duration ? 0 : 1;
+			my $command  = 'SCHEDULE_HOST_DOWNTIME';
+			my $addendum = q{};
+
+			$duration *= 3600;
+
+			if ( 'children' ~~ \@opts ) {
+				$command  = 'SCHEDULE_AND_PROPAGATE_HOST_DOWNTIME';
+				$addendum = ' and its children';
+			}
+			if ( 'trigger_children' ~~ \@opts ) {
+				$command  = 'SCHEDULE_AND_PROPAGATE_TRIGGERED_HOST_DOWNTIME';
+				$addendum = ' and its children (triggered)';
+			}
+
+			dispatch_command( $command, $host, $dt_start->epoch, $dt_end->epoch,
+				$fixed, 0, $duration, 'cli', $comment );
+			say "Scheduled host downtime for '$host'$addendum";
+		}
 		when ('recheck') {
 			dispatch_command( 'SCHEDULE_HOST_SVC_CHECKS', $host, time() );
 			say "Scheduled check of * on '$host'";
 		}
 		when ('force_recheck') {
-			dispatch_command( 'SCHEDULE_FORCED_HOST_SVC_CHECKS', $host, time() );
+			dispatch_command( 'SCHEDULE_FORCED_HOST_SVC_CHECKS', $host,
+				time() );
 			say "Scheduled forced check of * on '$host'";
 		}
 		default {
@@ -965,17 +1000,36 @@ sub action_on_service {
 	}
 
 	given ($action) {
+		when ('downtime') {
+			my ( $start, $end, $duration, $comment, @opts ) = @action_args;
+			my $strp = DateTime::Format::Strptime->new(
+				pattern   => '%Y-%m-%dT%H:%M:%S',
+				time_zone => 'Europe/Berlin',       # TODO read from system
+			);
+
+			my $dt_start = $strp->parse_datetime($start);
+			my $dt_end   = $strp->parse_datetime($end);
+			my $fixed    = $duration ? 0 : 1;
+
+			$duration *= 3600;
+
+			dispatch_command( 'SCHEDULE_SVC_DOWNTIME', $host, $service,
+				$dt_start->epoch, $dt_end->epoch,
+				$fixed, 0, $duration, 'cli', $comment );
+			say "Scheduled service downtime for '$service' on '$host'";
+		}
 		when ('recheck') {
 			dispatch_command( 'SCHEDULE_SVC_CHECK', $host, $service, time() );
 			say "Scheduled check of '$service' on '$host'";
 		}
 		when ('force_recheck') {
-			dispatch_command( 'SCHEDULE_FORCED_SVC_CHECK', $host, $service, time() );
+			dispatch_command( 'SCHEDULE_FORCED_SVC_CHECK', $host, $service,
+				time() );
 			say "Scheduled forced check of '$service' on '$host'";
 		}
 		when ('Acknowledge') {
-			dispatch_command( 'ACKNOWLEDGE_SVC_PROBLEM', $host, $service, 2, 1, 1,
-				'cli', $action_args[0] );
+			dispatch_command( 'ACKNOWLEDGE_SVC_PROBLEM', $host, $service, 2, 1,
+				1, 'cli', $action_args[0] );
 			say "Acknowledged $host/$service: $action_args[0]";
 		}
 		default {
@@ -1096,9 +1150,9 @@ aneurysm/{Libraries,Websites} >> with shell expansion).
 
 =item B<-a>|B<--action> I<action>[:I<args>]
 
-Run I<action> on all matching services. I<args> is a colon-separated list of
-action arguments and depends on the action in question. I<action> may also be
-a one or two letter shortcut.
+Run I<action> on all matching hosts or services. I<args> is a comma-separated
+list of action arguments and depends on the action in question. I<action> may
+also be a one or two letter shortcut.
 
 The following actions are supported:
 
@@ -1111,6 +1165,26 @@ acknwoledgment with notification and no expire time. The comment will not be
 persistent.
 
 Note: Acknowledgement of host problems is not yet supported.
+
+=item d|downtime I<start>,I<stop>,I<duration>,I<comment>[,I<opts>]
+
+Schedule a non-triggered host or service (depending on the filter arguments)
+downtime.  I<start> and I<stop> are timestamps and must be formatted as
+YYYY-MM-DDTHH:MM:SS, where the "T" is literal. At this moment, they are always
+interpreted in the Europe/Berlin timezone, this will change in the future.
+
+If I<duration> is 0 (zero), a fixed downtime between I<start> and I<stop>
+is scheduled. Otherwise, a flexible downtime which will start between
+I<start> and I<stop> and last I<duration> hours is scheduled. I<duration>
+may be a float.
+
+If a host is selected and I<opts> contains "children", a downtime for all of
+its children will be scheduled with the same parameters as the host's.
+Likewise, if I<opts> contains "trigger_children", a triggered downtime for all
+of the host's children will be scheduled.
+
+I<comment> refers to the downtime's comment field and must not contain the
+"," (comma) character.
 
 =item r|recheck
 
@@ -1333,14 +1407,25 @@ None.
 
 =item * autodie (included with perl >= 5.10.1)
 
+=item * DateTime
+
+=item * DateTime::Format::Strptime
+
 =item * Term::Size
 
 =back
 
 =head1 BUGS AND LIMITATIONS
 
-This software is in early development stages. So there will probably be quite
-a lot.
+When scheduling a downtime, the start and stop times are always interpreted
+in the Europe/Berlin timezone. Also, the duration parameter is always
+interpreted in hours.
+
+It is probably not clear from the documentation when an action will operate
+on hosts and when on services.
+
+Note that this software is not yet stable. Command line options may be changed
+/ removed and thus break backwards compatibility at any time.
 
 =head2 REPORTING BUGS
 

@@ -3,6 +3,8 @@ icli - Icinga Command Line Interface
 Requires:
  * A local icinga daemon + access to some of its files
  * perl v5.10 or newer with the following modules:
+ * DateTime
+ * DateTime::Format::Strptime
  * List::MoreUtils
  * Term::Size
 
