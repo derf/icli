@@ -102,6 +102,28 @@ sub pretty_duration {
 		$dif % 60, );
 }
 
+sub parse_duration {
+	my ($raw) = @_;
+
+	my %factors = (
+		s => 1,
+		m => 60,
+		h => 3600,
+		d => 86400,
+		w => 604800,
+	);
+
+	$raw =~ m{ ^ (?<value> [.0-9]+ ) \s* (?<unit> [mhdw] )? $ }x
+	  or die(
+"Cannot parse '$raw' - must be a number with an optional unit (s/m/h/d/w)"
+	  );
+
+	if ( $+{unit} ) {
+		return $+{value} * $factors{ $+{unit} };
+	}
+	return $+{value};
+}
+
 sub pretty_noyes {
 	my ($bool) = @_;
 	return (
@@ -968,7 +990,7 @@ sub action_on_host {
 			my $command  = 'SCHEDULE_HOST_DOWNTIME';
 			my $addendum = q{};
 
-			$duration *= 3600;
+			$duration = parse_duration($duration);
 
 			if ( 'children' ~~ \@opts ) {
 				$command  = 'SCHEDULE_AND_PROPAGATE_HOST_DOWNTIME';
@@ -1017,7 +1039,7 @@ sub action_on_service {
 			my $dt_end   = $strp->parse_datetime($end);
 			my $fixed    = $duration ? 0 : 1;
 
-			$duration *= 3600;
+			$duration = parse_duration($duration);
 
 			dispatch_command( 'SCHEDULE_SVC_DOWNTIME', $host, $service,
 				$dt_start->epoch, $dt_end->epoch,
@@ -1186,8 +1208,10 @@ interpreted in the Europe/Berlin timezone, this will change in the future.
 
 If I<duration> is 0 (zero), a fixed downtime between I<start> and I<stop>
 is scheduled. Otherwise, a flexible downtime which will start between
-I<start> and I<stop> and last I<duration> hours is scheduled. I<duration>
-may be a float.
+I<start> and I<stop> and last I<duration> is scheduled. In this case,
+I<duration> must be a real number appended with an optional unit
+(s for seconds, m for minutes, h for hours, d for days, w for weeks). If no
+unit is specified, seconds are used.
 
 If a host is selected and I<opts> contains "children", a downtime for all of
 its children will be scheduled with the same parameters as the host's.
