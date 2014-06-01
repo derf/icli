@@ -584,7 +584,13 @@ sub display_downtime {
 	my ($d) = @_;
 	my $v = $verbosity;
 
-	printf( '%-27.27s', $d->{'host_name'} );
+	if ( $d->{service_description} ) {
+		printf( '%-25.25s %-25.25s',
+			$d->{'host_name'}, $d->{service_description} );
+	}
+	else {
+		printf( '%-25.25s', $d->{'host_name'} );
+	}
 
 	if ( $v >= 3 ) {
 		printf( ' %s %-10.10s',
@@ -1082,7 +1088,12 @@ elsif ( $list_type eq 'q' ) {
 	display_queue();
 }
 elsif ( $list_type eq 'd' ) {
+	say "Host downtimes:";
 	foreach my $downtime ( @{ $data->{hostdowntimes} } ) {
+		display_downtime($downtime);
+	}
+	say "\nService downtimes:";
+	foreach my $downtime ( @{ $data->{servicedowntimes} } ) {
 		display_downtime($downtime);
 	}
 }

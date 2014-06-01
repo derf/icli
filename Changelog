@@ -6,6 +6,7 @@ git HEAD
       -aa/ -a acknowledge, -r/--recheck with -ar / -a recheck and
       -u/--force-recheck wiht -aR / -a force_recheck
     * add -ad / -a downtime option to schedule host/service downtimes
+    * Also show service downtimes when using --list downtimes
 
 icli 0.47 - Thu May 29 2014
 
