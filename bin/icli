@@ -95,6 +95,12 @@ sub pretty_duration {
 	my $now     = time();
 	my $dif     = $now - $since;
 
+	return pretty_duration_abs($dif);
+}
+
+sub pretty_duration_abs {
+	my ($dif) = @_;
+
 	return sprintf( '%dd %dh %dm %ds',
 		int( $dif / ( 24 * 3600 ) ),
 		int( ( $dif / 3600 ) % 24 ),
@@ -619,15 +625,19 @@ sub display_downtime {
 			pretty_date( $d->{'entry_time'} ),
 			$d->{'author'}, );
 	}
-	if ( $v >= 2 ) {
-		printf( ' %-30.30s', $d->{'comment'} );
-	}
-	printf( ' %s %s',
+	printf(
+		' %-20.20s %-20.20s',
 		pretty_date( $d->{'start_time'} ),
 		pretty_date( $d->{'end_time'} ),
 	);
 	if ( $v >= 2 ) {
-		print( $d->{'fixed'} ? ' Fixed' : ' Flexi' );
+		printf( '%-17.17s',
+			$d->{'fixed'}
+			? ' Fixed'
+			: ' ' . pretty_duration_abs( $d->{duration} ) );
+	}
+	if ( $v >= 2 ) {
+		print( $d->{comment} );
 	}
 
 	print "\n";
@@ -1111,10 +1121,25 @@ elsif ( $list_type eq 'q' ) {
 }
 elsif ( $list_type eq 'd' ) {
 	say "Host downtimes:";
+	if ( $verbosity == 1 ) {
+		printf( "%-25.25s %-20.20s %-20.20s\n", 'Host', 'start', 'stop' );
+	}
+	elsif ( $verbosity == 2 ) {
+		printf( "%-25.25s %-20.20s %-20.20s %-17.17s %s\n",
+			'Host', 'start', 'stop', 'duration', 'comment' );
+	}
 	foreach my $downtime ( @{ $data->{hostdowntimes} } ) {
 		display_downtime($downtime);
 	}
 	say "\nService downtimes:";
+	if ( $verbosity == 1 ) {
+		printf( "%-25.25s %-25.25s %-20.20s %-20.20s\n",
+			'Host', 'Service', 'start', 'stop' );
+	}
+	elsif ( $verbosity == 2 ) {
+		printf( "%-25.25s %-25.25s %-20.20s %-20.20s %-17.17s %s\n",
+			'Host', 'Service', 'start', 'stop', 'duration', 'comment' );
+	}
 	foreach my $downtime ( @{ $data->{servicedowntimes} } ) {
 		display_downtime($downtime);
 	}
