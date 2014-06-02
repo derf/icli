@@ -609,35 +609,82 @@ sub display_queue {
 }
 
 sub display_downtime {
-	my ($d) = @_;
-	my $v = $verbosity;
+	my ($d)    = @_;
+	my $v      = $verbosity;
+	my $format = "%-10s : %s\n";
 
-	if ( $d->{service_description} ) {
-		printf( '%-25.25s %-25.25s',
-			$d->{'host_name'}, $d->{service_description} );
+	if ( $v > 2 ) {
+		printf( $format, 'Host', $d->{host_name} );
+		if ( $d->{service_description} ) {
+			printf( $format, 'Service', $d->{service_description} );
+		}
+		printf( $format,
+			'Start',
+			$d->{is_in_effect}
+			? with_colour( pretty_date( $d->{start_time} ), 'bold' )
+			: pretty_date( $d->{start_time} ) );
+		printf( $format,
+			'End',
+			$d->{is_in_effect}
+			? with_colour( pretty_date( $d->{end_time} ), 'bold' )
+			: pretty_date( $d->{end_time} ) );
+		printf( $format,
+			'Duration',
+			$d->{fixed} ? 'Fixed' : pretty_duration_abs( $d->{duration} ) );
+		if ( $v > 3 ) {
+			printf( $format, 'ID', $d->{downtime_id} );
+			if ( $d->{trigger_time} ) {
+				printf( $format,
+					'Trigger',
+					$d->{triggered_by}
+					  . ' (active since '
+					  . pretty_date( $d->{trigger_time} )
+					  . ')' );
+			}
+			else {
+				printf( $format, 'Trigger', $d->{triggered_by} || 'None' );
+			}
+		}
+		printf( $format, 'Author', $d->{author} );
+		printf( $format, 'Comment', break_str( $d->{comment}, 19 ) );
 	}
 	else {
-		printf( '%-25.25s', $d->{'host_name'} );
-	}
 
-	if ( $v >= 3 ) {
-		printf( ' %s %-10.10s',
-			pretty_date( $d->{'entry_time'} ),
-			$d->{'author'}, );
-	}
-	printf(
-		' %-20.20s %-20.20s',
-		pretty_date( $d->{'start_time'} ),
-		pretty_date( $d->{'end_time'} ),
-	);
-	if ( $v >= 2 ) {
-		printf( '%-17.17s',
-			$d->{'fixed'}
-			? ' Fixed'
-			: ' ' . pretty_duration_abs( $d->{duration} ) );
-	}
-	if ( $v >= 2 ) {
-		print( $d->{comment} );
+		if ( $d->{service_description} ) {
+			printf( '%-25.25s %-25.25s',
+				$d->{'host_name'}, $d->{service_description} );
+		}
+		else {
+			printf( '%-25.25s', $d->{'host_name'} );
+		}
+
+		if ( $v >= 3 ) {
+			printf( ' %s %-10.10s',
+				pretty_date( $d->{'entry_time'} ),
+				$d->{'author'}, );
+		}
+		if ( $d->{is_in_effect} ) {
+			printf( ' %-28s %-28s',
+				with_colour( pretty_date( $d->{'start_time'} ), 'bold' ),
+				with_colour( pretty_date( $d->{'end_time'} ),   'bold' ),
+			);
+		}
+		else {
+			printf(
+				' %-20.20s %-20.20s',
+				pretty_date( $d->{'start_time'} ),
+				pretty_date( $d->{'end_time'} ),
+			);
+		}
+		if ( $v >= 2 ) {
+			printf( '%-17.17s',
+				$d->{'fixed'}
+				? ' Fixed'
+				: ' ' . pretty_duration_abs( $d->{duration} ) );
+		}
+		if ( $v >= 2 ) {
+			print( $d->{comment} );
+		}
 	}
 
 	print "\n";
