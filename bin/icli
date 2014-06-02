@@ -1120,28 +1120,38 @@ elsif ( $list_type eq 'q' ) {
 	display_queue();
 }
 elsif ( $list_type eq 'd' ) {
-	say "Host downtimes:";
-	if ( $verbosity == 1 ) {
-		printf( "%-25.25s %-20.20s %-20.20s\n", 'Host', 'start', 'stop' );
+	if ( @{ $data->{hostdowntimes} } ) {
+		say "Host downtimes:";
+		if ( $verbosity == 1 ) {
+			printf( "%-25.25s %-20.20s %-20.20s\n", 'Host', 'start', 'stop' );
+		}
+		elsif ( $verbosity == 2 ) {
+			printf( "%-25.25s %-20.20s %-20.20s %-17.17s %s\n",
+				'Host', 'start', 'stop', 'duration', 'comment' );
+		}
+		foreach my $downtime ( @{ $data->{hostdowntimes} } ) {
+			display_downtime($downtime);
+		}
 	}
-	elsif ( $verbosity == 2 ) {
-		printf( "%-25.25s %-20.20s %-20.20s %-17.17s %s\n",
-			'Host', 'start', 'stop', 'duration', 'comment' );
+	else {
+		say "No host downtimes";
 	}
-	foreach my $downtime ( @{ $data->{hostdowntimes} } ) {
-		display_downtime($downtime);
+	if ( @{ $data->{servicedowntimes} } ) {
+		say "\nService downtimes:";
+		if ( $verbosity == 1 ) {
+			printf( "%-25.25s %-25.25s %-20.20s %-20.20s\n",
+				'Host', 'Service', 'start', 'stop' );
+		}
+		elsif ( $verbosity == 2 ) {
+			printf( "%-25.25s %-25.25s %-20.20s %-20.20s %-17.17s %s\n",
+				'Host', 'Service', 'start', 'stop', 'duration', 'comment' );
+		}
+		foreach my $downtime ( @{ $data->{servicedowntimes} } ) {
+			display_downtime($downtime);
+		}
 	}
-	say "\nService downtimes:";
-	if ( $verbosity == 1 ) {
-		printf( "%-25.25s %-25.25s %-20.20s %-20.20s\n",
-			'Host', 'Service', 'start', 'stop' );
-	}
-	elsif ( $verbosity == 2 ) {
-		printf( "%-25.25s %-25.25s %-20.20s %-20.20s %-17.17s %s\n",
-			'Host', 'Service', 'start', 'stop', 'duration', 'comment' );
-	}
-	foreach my $downtime ( @{ $data->{servicedowntimes} } ) {
-		display_downtime($downtime);
+	else {
+		say "\nNo service downtimes";
 	}
 }
 elsif ($action) {
