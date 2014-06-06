@@ -1167,7 +1167,7 @@ elsif ( $list_type eq 'q' ) {
 	display_queue();
 }
 elsif ( $list_type eq 'd' ) {
-	if ( @{ $data->{hostdowntimes} } ) {
+	if ( exists $data->{hostdowntimes} ) {
 		say "Host downtimes:";
 		if ( $verbosity == 1 ) {
 			printf( "%-25.25s %-20.20s %-20.20s\n", 'Host', 'start', 'stop' );
@@ -1183,7 +1183,7 @@ elsif ( $list_type eq 'd' ) {
 	else {
 		say "No host downtimes";
 	}
-	if ( @{ $data->{servicedowntimes} } ) {
+	if ( exists $data->{servicedowntimes} ) {
 		say "\nService downtimes:";
 		if ( $verbosity == 1 ) {
 			printf( "%-25.25s %-25.25s %-20.20s %-20.20s\n",
