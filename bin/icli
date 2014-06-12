@@ -384,12 +384,10 @@ sub read_objects_line {
 				  = $cache;
 			}
 			when ('hostcomment') {
-
-				# TODO
+				push( @{ ${$ref}->{hostcomments} }, $cache );
 			}
 			when ('servicecomment') {
-
-				# TODO
+				push( @{ ${$ref}->{servicecomments} }, $cache );
 			}
 			when ('host') {
 				${$ref}->{hosts}->{ $cache->{host_name} } = $cache;
@@ -441,6 +439,16 @@ sub read_objects {
 }
 
 sub enhance_status {
+	for my $c ( @{ $data->{servicecomments} } ) {
+		say "!";
+		my $service
+		  = firstval { $_->{service_description} eq $c->{service_description} }
+		@{ $data->{services}->{ $c->{host_name} } };
+		push( @{ $service->{comments} }, $c );
+	}
+	for my $c ( @{ $data->{hostcomments} } ) {
+		push( @{ $data->{hosts}->{ $c->{host_name} }->{comments} }, $c );
+	}
 	HOST: for my $h ( keys %{ $data->{services} } ) {
 		for my $s ( @{ $data->{services}->{$h} } ) {
 			if ( $s->{current_state} != 0 ) {
@@ -802,6 +810,10 @@ sub display_x_verbose {
 			'Flap Detection',
 			pretty_yesno( $x->{'flap_detection_enabled'} ),
 		);
+
+		for my $c ( @{ $x->{comments} // [] } ) {
+			printf( $format, 'Comment', break_str( $c->{comment_data}, 19 ) );
+		}
 	}
 }
 
