@@ -1,4 +1,4 @@
-git HEAD
+App::Icli 0.48 - Fri Jun 13 2014
 
     * New dependencies: DateTime, DateTime::Format::Strptime, DateTime::TimeZone
     * NOT BACKWARDS COMPATIBLE: Add -a/--action option to invoke generic

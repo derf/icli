@@ -19,7 +19,7 @@ use POSIX qw(strftime);
 use Term::ANSIColor;
 use Term::Size;
 
-our $VERSION = '0.47';
+our $VERSION = '0.48';
 
 my ( $cache, $config, $data, $extra );
 my $config_file = App::Icli::ConfigData->config('object_file');
@@ -1256,7 +1256,7 @@ B<icli> [B<-v>|B<-vv>|B<-vvv>] [B<-z> I<filter>] [B<-h> I<hosts>] [B<-g> I<hostg
 
 =head1 VERSION
 
-version 0.47
+version 0.48
 
 =head1 DESCRIPTION
 

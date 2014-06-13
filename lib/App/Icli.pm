@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use 5.010;
 
-our $VERSION = '0.47';
+our $VERSION = '0.48';
 
 1;
 
@@ -20,7 +20,7 @@ None.
 
 =head1 VERSION
 
-version 0.47
+version 0.48
 
 =head1 DESCRIPTION
 
