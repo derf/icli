@@ -8,6 +8,7 @@ git HEAD
     * add -ad / -a downtime option to schedule host/service downtimes
     * Also show service downtimes when using -ld, improve its output
     * Show service comments when using -vvv
+    * Rename package to App::Icli to avoid CPAN namespace conflicts
 
 icli 0.47 - Thu May 29 2014
 

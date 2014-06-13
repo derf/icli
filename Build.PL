@@ -34,8 +34,6 @@ my $build = Module::Build->new(
 		status_file => '/var/lib/icinga/status.dat',
 		command_file => '/var/lib/icinga/rw/icinga.cmd',
 	},
-	dist_name => 'icli',
-	dist_version_from => 'bin/icli',
 	module_name => 'App::Icli',
 	license => 'unrestricted',
 	requires => {
