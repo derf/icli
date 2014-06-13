@@ -1,6 +1,6 @@
 git HEAD
 
-    * New dependencies: DateTime and DateTime::Format::Strptime
+    * New dependencies: DateTime, DateTime::Format::Strptime, DateTime::TimeZone
     * NOT BACKWARDS COMPATIBLE: Add -a/--action option to invoke generic
       actions on selected services. This replaces -a/--acknowledge with
       -aa/ -a acknowledge, -r/--recheck with -ar / -a recheck and

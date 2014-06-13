@@ -12,6 +12,7 @@ use App::Icli::ConfigData;
 use Carp qw(croak);
 use DateTime;
 use DateTime::Format::Strptime;
+use DateTime::TimeZone;
 use Getopt::Long qw/:config bundling/;
 use List::MoreUtils qw(any firstval);
 use POSIX qw(strftime);
@@ -1044,12 +1045,14 @@ sub dispatch_command {
 sub action_on_host {
 	my ($host) = @_;
 
+	my $tz = DateTime::TimeZone->new( name => 'local' );
+
 	given ($action) {
 		when ('downtime') {
 			my ( $start, $end, $duration, $comment, @opts ) = @action_args;
 			my $strp = DateTime::Format::Strptime->new(
 				pattern   => '%Y-%m-%dT%H:%M:%S',
-				time_zone => 'Europe/Berlin',       # TODO read from system
+				time_zone => $tz->name,
 			);
 
 			my $dt_start = $strp->parse_datetime($start);
@@ -1095,12 +1098,14 @@ sub action_on_service {
 		return;
 	}
 
+	my $tz = DateTime::TimeZone->new( name => 'local' );
+
 	given ($action) {
 		when ('downtime') {
 			my ( $start, $end, $duration, $comment, @opts ) = @action_args;
 			my $strp = DateTime::Format::Strptime->new(
 				pattern   => '%Y-%m-%dT%H:%M:%S',
-				time_zone => 'Europe/Berlin',       # TODO read from system
+				time_zone => $tz->name,
 			);
 
 			my $dt_start = $strp->parse_datetime($start);
@@ -1296,8 +1301,8 @@ Note: Acknowledgement of host problems is not yet supported.
 
 Schedule a non-triggered host or service (depending on the filter arguments)
 downtime.  I<start> and I<stop> are timestamps and must be formatted as
-YYYY-MM-DDTHH:MM:SS, where the "T" is literal. At this moment, they are always
-interpreted in the Europe/Berlin timezone, this will change in the future.
+YYYY-MM-DDTHH:MM:SS, where the "T" is literal. The timestamp is assumed to
+be in the same time zone as the system running icli.
 
 If I<duration> is 0 (zero), a fixed downtime between I<start> and I<stop>
 is scheduled. Otherwise, a flexible downtime which will start between
@@ -1539,15 +1544,13 @@ None.
 
 =item * DateTime::Format::Strptime
 
+=item * DateTime::TimeZone
+
 =item * Term::Size
 
 =back
 
 =head1 BUGS AND LIMITATIONS
-
-When scheduling a downtime, the start and stop times are always interpreted
-in the Europe/Berlin timezone. Also, the duration parameter is always
-interpreted in hours.
 
 It is probably not clear from the documentation when an action will operate
 on hosts and when on services.

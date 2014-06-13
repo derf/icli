@@ -5,6 +5,7 @@ Requires:
  * perl v5.10 or newer with the following modules:
  * DateTime
  * DateTime::Format::Strptime
+ * DateTime::TimeZone
  * List::MoreUtils
  * Term::Size
 

@@ -41,6 +41,7 @@ my $build = Module::Build->new(
 		'Carp' => 0,
 		'DateTime' => 0,
 		'DateTime::Format::Strptime' => 0,
+		'DateTime::TimeZone' => 0,
 		'Getopt::Long' => 0,
 		'List::MoreUtils' => 0,
 		'POSIX' => 0,
