@@ -440,7 +440,6 @@ sub read_objects {
 
 sub enhance_status {
 	for my $c ( @{ $data->{servicecomments} } ) {
-		say "!";
 		my $service
 		  = firstval { $_->{service_description} eq $c->{service_description} }
 		@{ $data->{services}->{ $c->{host_name} } };
