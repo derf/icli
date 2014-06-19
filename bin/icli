@@ -115,14 +115,14 @@ sub parse_duration {
 	my %factors = (
 		s => 1,
 		m => 60,
-		h => 3600,
-		d => 86400,
-		w => 604800,
+		h => 3_600,
+		d => 86_400,
+		w => 604_800,
 	);
 
 	$raw =~ m{ ^ (?<value> [.0-9]+ ) \s* (?<unit> [mhdw] )? $ }x
 	  or die(
-"Cannot parse '$raw' - must be a number with an optional unit (s/m/h/d/w)"
+"Cannot parse '$raw' - must be a duration like '50s', '2m', '10h' or '1d'"
 	  );
 
 	if ( $+{unit} ) {
@@ -199,7 +199,7 @@ sub split_by_words {
 		  )
 		{
 			if ($tr_space) {
-				$cur_str .= ' ';
+				$cur_str .= q{ };
 			}
 			else {
 				$tr_space = 1;
@@ -207,7 +207,7 @@ sub split_by_words {
 			$cur_str .= shift(@words);
 		}
 		if (@ret) {
-			$cur_str = ( ' ' x $padding ) . $cur_str;
+			$cur_str = ( q{ } x $padding ) . $cur_str;
 		}
 		push( @ret, $cur_str );
 	}
@@ -688,7 +688,7 @@ sub display_downtime {
 			printf( '%-17.17s',
 				$d->{'fixed'}
 				? ' Fixed'
-				: ' ' . pretty_duration_abs( $d->{duration} ) );
+				: q{ } . pretty_duration_abs( $d->{duration} ) );
 		}
 		if ( $v >= 2 ) {
 			print( $d->{comment} );
@@ -870,7 +870,7 @@ sub display_service {
 			$n_width += 4;
 		}
 
-		print ' ';
+		print q{ };
 
 		print break_str( $s->{plugin_output}, $n_width );
 
@@ -1184,7 +1184,7 @@ elsif ( $list_type eq 'q' ) {
 }
 elsif ( $list_type eq 'd' ) {
 	if ( exists $data->{hostdowntimes} ) {
-		say "Host downtimes:";
+		say 'Host downtimes:';
 		if ( $verbosity == 1 ) {
 			printf( "%-25.25s %-20.20s %-20.20s\n", 'Host', 'start', 'stop' );
 		}
@@ -1197,7 +1197,7 @@ elsif ( $list_type eq 'd' ) {
 		}
 	}
 	else {
-		say "No host downtimes";
+		say 'No host downtimes';
 	}
 	if ( exists $data->{servicedowntimes} ) {
 		say "\nService downtimes:";
