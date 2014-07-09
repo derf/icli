@@ -463,11 +463,13 @@ sub enhance_status {
 				$s->{contacts} =~ s{^ *}{}o;
 				$s->{contacts} = [ split( m{, *}, $s->{contacts} ) ];
 			}
-			for my $group ( split( m{, *}, $s->{contact_groups} ) ) {
-				push(
-					@{ $s->{contacts} },
-					@{ $config->{contactgroups}{$group} }
-				);
+			if ($s->{contact_groups}) {
+				for my $group ( split( m{, *}, $s->{contact_groups} ) ) {
+					push(
+						@{ $s->{contacts} },
+						@{ $config->{contactgroups}{$group} }
+					);
+				}
 			}
 		}
 	}

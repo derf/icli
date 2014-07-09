@@ -1,3 +1,8 @@
+git HEAD
+
+    * Do not throw warnings when encountering a host/service with an empty
+      contact group list
+
 App::Icli 0.48 - Fri Jun 13 2014
 
     * New dependencies: DateTime, DateTime::Format::Strptime, DateTime::TimeZone
