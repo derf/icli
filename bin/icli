@@ -312,6 +312,10 @@ sub filter_host {
 		return 0;
 	}
 
+	if ( $as_contact and not has_contact_host( $h, $as_contact ) ) {
+		return 0;
+	}
+
 	return 1;
 }
 
@@ -328,14 +332,22 @@ sub filter_service {
 		return 0;
 	}
 
-	if ( $as_contact and not has_contact( $s, $as_contact ) ) {
+	if ( $as_contact and not has_contact_service( $s, $as_contact ) ) {
 		return 0;
 	}
 
 	return 1;
 }
 
-sub has_contact {
+sub has_contact_host {
+	my ( $h, $contact ) = @_;
+
+	my $conf_h = $config->{hosts}{ $h->{host_name} };
+
+	return any { $_ eq $contact } @{ $conf_h->{contacts} };
+}
+
+sub has_contact_service {
 	my ( $s, $contact ) = @_;
 
 	my $conf_s
@@ -457,13 +469,19 @@ sub enhance_status {
 			}
 		}
 	}
+	for my $h ( values %{ $config->{hosts} } ) {
+		if ( $h->{contacts} ) {
+			$h->{contacts} =~ s{^ *}{}o;
+			$h->{contacts} = [ split( m{, *}, $h->{contacts} ) ];
+		}
+	}
 	HOST: for my $h ( keys %{ $config->{services} } ) {
 		for my $s ( @{ $config->{services}->{$h} } ) {
 			if ( $s->{contacts} ) {
 				$s->{contacts} =~ s{^ *}{}o;
 				$s->{contacts} = [ split( m{, *}, $s->{contacts} ) ];
 			}
-			if ($s->{contact_groups}) {
+			if ( $s->{contact_groups} ) {
 				for my $group ( split( m{, *}, $s->{contact_groups} ) ) {
 					push(
 						@{ $s->{contacts} },

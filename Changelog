@@ -2,6 +2,7 @@ git HEAD
 
     * Do not throw warnings when encountering a host/service with an empty
       contact group list
+    * Support -U user for hosts (-lh) as well
 
 App::Icli 0.48 - Fri Jun 13 2014
 
