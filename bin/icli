@@ -312,7 +312,7 @@ sub filter_host {
 		return 0;
 	}
 
-	if ( $as_contact and not has_contact_host( $h, $as_contact ) ) {
+	if ( $as_contact and not host_has_contact( $h, $as_contact ) ) {
 		return 0;
 	}
 
@@ -332,14 +332,14 @@ sub filter_service {
 		return 0;
 	}
 
-	if ( $as_contact and not has_contact_service( $s, $as_contact ) ) {
+	if ( $as_contact and not service_has_contact( $s, $as_contact ) ) {
 		return 0;
 	}
 
 	return 1;
 }
 
-sub has_contact_host {
+sub host_has_contact {
 	my ( $h, $contact ) = @_;
 
 	my $conf_h = $config->{hosts}{ $h->{host_name} };
@@ -347,7 +347,7 @@ sub has_contact_host {
 	return any { $_ eq $contact } @{ $conf_h->{contacts} };
 }
 
-sub has_contact_service {
+sub service_has_contact {
 	my ( $s, $contact ) = @_;
 
 	my $conf_s
@@ -612,9 +612,19 @@ sub display_queue {
 	  );
 
 	@queue = grep { $_->{host_name} ~~ \@list_hosts } @queue;
+	if ($as_contact) {
+		@queue = grep {
+			exists $_->{service_description}
+			  ? service_has_contact( $_, $as_contact )
+			  : host_has_contact( $_, $as_contact )
+		} @queue;
+	}
 
 	if (@list_services) {
 		@queue = grep { $_->{service_description} ~~ \@list_services } @queue;
+		if ($as_contact) {
+			@queue = grep { host_has_contact( $_, $as_contact ) } @queue;
+		}
 	}
 
 	printf( "%-25.25s  %-20.20s  %-19s  %-19s\n",
@@ -1395,8 +1405,7 @@ When used with C<< -lh >>, lists all hosts with the number of ok / warning /
 
 =item B<-U>|B<--as-contact> I<name>
 
-Only operate on service visible to I<name>. Doesn't work for B<-lh> yet,
-most useful for B<-ls>.
+Only operate on service visible to I<name>.
 
 NOTE: This is meant to help find out which services a user has access to. It is
 NOT intended as a way to restrict access and should never be used that way.
