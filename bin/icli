@@ -356,7 +356,10 @@ sub filter_host {
 		return 0;
 	}
 
-	if ( $as_contact and not host_has_contact( $h, $as_contact ) ) {
+	if (    $as_contact
+		and not host_has_contact( $h, $as_contact )
+		and not $api1_root )
+	{
 		return 0;
 	}
 
