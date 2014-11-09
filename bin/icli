@@ -14,7 +14,10 @@ use DateTime;
 use DateTime::Format::Strptime;
 use DateTime::TimeZone;
 use Getopt::Long qw/:config bundling/;
+use JSON;
 use List::MoreUtils qw(any firstval);
+use LWP::UserAgent;
+use Net::Netrc;
 use POSIX qw(strftime);
 use Term::ANSIColor;
 use Term::Size;
@@ -25,6 +28,8 @@ my ( $cache, $config, $data, $extra );
 my $config_file = App::Icli::ConfigData->config('object_file');
 my $status_file = App::Icli::ConfigData->config('status_file');
 my $rw_file     = App::Icli::ConfigData->config('command_file');
+my ( $api1_root, $ua );
+my $realm = 'Icinga Access';
 my $context;
 my $colours      = 1;
 my $list_type    = 's';
@@ -167,6 +172,45 @@ sub pretty_state {
 		return with_colour( sprintf( '%4d', $count ), $colour );
 	}
 	return sprintf( '%4d', $count );
+}
+
+sub setup_ua {
+	my ($url) = @_;
+	my $m;
+
+	$url =~ m{
+		^ 
+		(?: (?<proto> [^:]+ ) :// )?
+		(?: (?<user> [^@]+ ) @ )?
+		(?<host> [^:/@]+ )
+		(?: : (?<port> \d++ ) )?
+		(?<url> .* )
+		$
+	}x
+	  or die( "Cannot parse API url '$url'\n"
+		  . "This may be a bug. If you think so, please report it\n" );
+
+	my $proto = $+{proto} // 'http';
+	my $host  = $+{host};
+	my $port  = $+{port} // ( $proto eq 'http' ? 80 : 443 );
+
+	if ( $+{user} ) {
+		$as_contact = $+{user};
+	}
+
+	my $netrc_name = "$host:$port";
+
+	$ua = LWP::UserAgent->new( timeout => 5 );
+
+	$m = Net::Netrc->lookup( $netrc_name, $as_contact )
+	  or warn( "Cannot find an entry for '$netrc_name' "
+		  . ( $as_contact ? "with login '$as_contact' " : q{} )
+		  . "in ~/.netrc\n" );
+
+	if ($m) {
+		$ua->credentials( $netrc_name, $realm, $m->login, $m->password );
+	}
+	$ua->env_proxy;
 }
 
 sub split_by_words {
@@ -332,7 +376,10 @@ sub filter_service {
 		return 0;
 	}
 
-	if ( $as_contact and not service_has_contact( $s, $as_contact ) ) {
+	if (    $as_contact
+		and not service_has_contact( $s, $as_contact )
+		and not $api1_root )
+	{
 		return 0;
 	}
 
@@ -355,6 +402,87 @@ sub service_has_contact {
 	@{ $config->{services}{ $s->{host_name} } };
 
 	return any { $_ eq $contact } @{ $conf_s->{contacts} };
+}
+
+sub read_json {
+	my ( $res, $ref ) = @_;
+
+	my %statusmap = (
+		OK          => 0,
+		WARNING     => 1,
+		CRITICAL    => 2,
+		UNKNOWN     => 3,
+		UP          => 0,
+		DOWN        => 1,
+		UNREACHABLE => 2,
+		PENDING     => 0,
+	);
+
+	my $json = from_json( $res->decoded_content );
+
+	if ( $json->{config}->{error} ) {
+		warn( 'While reading ' . $res->request->uri . ":\n" );
+		warn( 'JSON API Error: ' . $json->{config}->{error}->{title} . "\n" );
+		warn( '                ' . $json->{config}->{error}->{text} . "\n" );
+	}
+
+	if ( $json->{config}->{hosts} ) {
+		for my $host ( @{ $json->{config}->{hosts} } ) {
+			${$ref}->{hosts}->{ $host->{host_name} } = $host;
+		}
+	}
+	if ( $json->{config}->{hostgroups} ) {
+		for my $group ( @{ $json->{config}->{hostgroups} } ) {
+			${$ref}->{hostgroups}->{ $group->{group_name} } = $group;
+		}
+	}
+	if ( $json->{config}->{services} ) {
+		for my $service ( @{ $json->{config}->{services} } ) {
+			push(
+				@{ ${$ref}->{services}->{ $service->{host_name} } },
+				$service
+			);
+		}
+	}
+	if ( $json->{config}->{servicegroups} ) {
+		for my $group ( @{ $json->{config}->{servicegroups} } ) {
+			${$ref}->{servicegroups}->{ $group->{group_name} } = $group;
+		}
+	}
+
+	if ( $json->{status}->{host_status} ) {
+		for my $host ( @{ $json->{status}->{host_status} } ) {
+
+			$host->{has_been_checked}
+			  = ( $host->{status} eq 'PENDING' ? 0 : 1 );
+			$host->{current_state}      = $statusmap{ $host->{status} };
+			$host->{plugin_output}      = $host->{status_information};
+			$host->{long_plugin_output} = $host->{status_information};
+
+			( $host->{current_attempt}, $host->{max_attempts} )
+			  = split( '/', $host->{attempts} );
+
+			${$ref}->{hosts}->{ $host->{host_name} } = $host;
+		}
+	}
+	if ( $json->{status}->{service_status} ) {
+		for my $service ( @{ $json->{status}->{service_status} } ) {
+
+			$service->{has_been_checked}
+			  = ( $service->{status} eq 'PENDING' ? 0 : 1 );
+			$service->{current_state}      = $statusmap{ $service->{status} };
+			$service->{plugin_output}      = $service->{status_information};
+			$service->{long_plugin_output} = $service->{status_information};
+
+			( $service->{current_attempt}, $service->{max_attempts} )
+			  = split( '/', $service->{attempts} );
+
+			push(
+				@{ ${$ref}->{services}->{ $service->{host_name} } },
+				$service
+			);
+		}
+	}
 }
 
 sub read_objects_line {
@@ -1170,6 +1298,7 @@ sub action_on_service {
 }
 
 GetOptions(
+	'api1=s'          => \$api1_root,
 	'a|action=s'      => \$action,
 	'c|config=s'      => \$config_file,
 	'C|no-colours'    => sub { $colours = 0 },
@@ -1180,6 +1309,7 @@ GetOptions(
 	'l|list=s'        => sub { $list_type = substr( $_[1], 0, 1 ) },
 	'm|match=s' => sub { $match_output = qr{$_[1]}i },
 	'o|overview'     => \$overview,
+	'realm=s'        => \$realm,
 	's|service=s'    => sub { push( @for_services, split( /,/, $_[1] ) ) },
 	'U|as-contact=s' => \$as_contact,
 	'v|verbose+'     => \$verbosity,
@@ -1188,8 +1318,40 @@ GetOptions(
 	'z|filter=s' => sub { push( @filters, split( /,/, $_[1] ) ) },
 ) or die("Please see perldoc -F $0 for help\n");
 
-read_objects( $status_file, \$data, 'icinga status_file', '--status-file' );
-read_objects( $config_file, \$config, 'icinga object_cache_file', '--config' );
+if ($api1_root) {
+	setup_ua($api1_root);
+
+	my $config_url = "$api1_root/config.cgi?jsonoutput&type=all";
+	my $hdata_url  = "$api1_root/status.cgi?jsonoutput&style=hostdetail";
+	my $sdata_url  = "$api1_root/status.cgi?jsonoutput";
+
+	my $config_res = $ua->get($config_url);
+	my $hdata_res  = $ua->get($hdata_url);
+	my $sdata_res  = $ua->get($sdata_url);
+
+	for my $request (
+		[ $config_url, $config_res ],
+		[ $hdata_url,  $hdata_res ],
+		[ $sdata_url,  $sdata_res ]
+	  )
+	{
+		my ( $url, $res ) = @{$request};
+		if ( $res->is_error ) {
+			die( "Error while requesting $url\nError description:\n\n"
+				  . $res->as_string );
+		}
+	}
+
+	read_json( $config_res, \$config );
+	read_json( $hdata_res,  \$data );
+	read_json( $sdata_res,  \$data );
+}
+else {
+	read_objects( $status_file, \$data, 'icinga status_file', '--status-file' );
+	read_objects( $config_file, \$config, 'icinga object_cache_file',
+		'--config' );
+}
+
 enhance_status();
 parse_action();
 compute_hostlist();
