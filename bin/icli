@@ -460,7 +460,8 @@ sub read_json {
 			  = ( $host->{status} eq 'PENDING' ? 0 : 1 );
 			$host->{current_state}      = $statusmap{ $host->{status} };
 			$host->{plugin_output}      = $host->{status_information};
-			$host->{long_plugin_output} = $host->{status_information};
+			$host->{long_plugin_output} = q{};
+			$host->{performance_data}   = q{};
 
 			( $host->{current_attempt}, $host->{max_attempts} )
 			  = split( '/', $host->{attempts} );
@@ -475,7 +476,8 @@ sub read_json {
 			  = ( $service->{status} eq 'PENDING' ? 0 : 1 );
 			$service->{current_state}      = $statusmap{ $service->{status} };
 			$service->{plugin_output}      = $service->{status_information};
-			$service->{long_plugin_output} = $service->{status_information};
+			$service->{long_plugin_output} = q{};
+			$service->{performance_data}   = q{};
 
 			( $service->{current_attempt}, $service->{max_attempts} )
 			  = split( '/', $service->{attempts} );
