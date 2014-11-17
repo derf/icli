@@ -1526,6 +1526,16 @@ Schedule a forced, immediate recheck
 
 =back
 
+=item B<--api1> I<apiroot>
+
+Set Icinga 1.x (Classic UI) JSON API root to I<apiroot>. I<apiroot> must be the root
+of Icinga's CGI directory. For instance, if your tactical overview has the
+URL C<< https://monitoring.finalrewind.org/cgi-bin/icinga/tac.cgi >>,
+you need to set I<apiroot> to C<< https://monitoring.finalrewind.org/cgi-bin/icinga >>.
+
+Please refer to the L</"JSON API"> section in this manual for more information
+about this API.
+
 =item B<-c>|B<--config> I<config>
 
 Read config from I<file>
@@ -1569,6 +1579,11 @@ By default (or when used with C<< -ls >>) the number of all hosts and services
 
 When used with C<< -lh >>, lists all hosts with the number of ok / warning /
 ... checks on each host.
+
+=item B<--realm> I<realm>
+
+Set HTTP Basic Auth realm to I<realm>. Defaults to C<< Icinga Access >>. Only
+useful when combined with a JSON or XML API.
 
 =item B<-U>|B<--as-contact> I<name>
 
