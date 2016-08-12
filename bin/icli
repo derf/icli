@@ -1195,7 +1195,7 @@ sub display_overview {
 }
 
 sub dispatch_command {
-	my $str = join( ';', @_ );
+	my $str = join( ';', @_ ) . "\n";
 
 	open( my $cmd_fh, '>', $rw_file )
 	  or die( "Failed to open icinga command file ($rw_file): $!\n"
