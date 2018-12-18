@@ -56,6 +56,11 @@ my $build = Module::Build->new(
 	test_types => {
 		author => '.at',
 	},
+	meta_merge => {
+		resources => {
+			repository => 'https://github.com/derf/icli'
+		}
+	},
 );
 
 print <<'EOF';
