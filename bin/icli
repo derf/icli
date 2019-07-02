@@ -1195,7 +1195,7 @@ sub display_overview {
 }
 
 sub dispatch_command {
-	my $str = join( ';', @_ );
+	my $str = join( ';', @_ ) . "\n";
 
 	open( my $cmd_fh, '>', $rw_file )
 	  or die( "Failed to open icinga command file ($rw_file): $!\n"
@@ -1291,7 +1291,7 @@ sub action_on_service {
 				time() );
 			say "Scheduled forced check of '$service' on '$host'";
 		}
-		when ('Acknowledge') {
+		when ('acknowledge') {
 			dispatch_command( 'ACKNOWLEDGE_SVC_PROBLEM', $host, $service, 2, 1,
 				1, 'cli', $action_args[0] );
 			say "Acknowledged $host/$service: $action_args[0]";
