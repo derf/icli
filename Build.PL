@@ -22,7 +22,7 @@ my @command_paths = (
 my $build = Module::Build->new(
 	build_requires => {
 		'Test::More' => 0,
-		'Test::Compile' => 0,
+		'Test::Compile' => "1.3.0",
 		'Test::Pod' => 0,
 		'Test::Command' => 0,
 	},
